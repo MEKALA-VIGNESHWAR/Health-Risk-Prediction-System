@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Health Risk Prediction System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav class="sidebar">
+        <div class="logo">HealthGuard</div>
+        
+        <div class="role-switcher">
+            <button onclick="showView('patient')">Patient View</button>
+            <button onclick="showView('doctor')">Doctor View</button>
+        </div>
+
+        <div class="menu-group" id="patient-menu">
+            <p class="menu-label">Patient Portal</p>
+            <a href="#" class="nav-link active"><span class="icon">🔍</span> Check Health</a>
+            <a href="#" class="nav-link"><span class="icon">📅</span> History</a>
+            <a href="#" class="nav-link"><span class="icon">🔔</span> Notifications <span class="notif-badge">3</span></a>
+        </div>
+
+        <div class="menu-group" id="doctor-menu" style="display:none;">
+            <p class="menu-label">Doctor Dashboard</p>
+            <a href="#" class="nav-link"><span class="icon">📊</span> Patient Health Data</a>
+            <a href="#" class="nav-link"><span class="icon">📋</span> Risk Reports</a>
+        </div>
+
+        <div class="user-profile">
+            <img src="https://ui-avatars.com/api/?name=Vigneshwar" alt="User">
+            <div class="user-info">
+                <p class="name">M. Vigneshwar</p>
+                <p class="role" id="current-role-text">Patient</p>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <span class="badge">Healthcare Solution</span>
+            <h1>Patient Health Risk Prediction System</h1>
+            <p class="subtitle">Predictive Analytics for Early Stage Clinical Decisions</p>
+        </header>
+
+        <main class="abstract-card" id="main-content">
+    <div id="check-health-section">
+        <h2>Health Risk Assessment</h2>
+        <p class="subtitle">Enter your clinical indicators for an AI-powered risk prediction.</p>
+        
+        <form id="prediction-form" class="health-form">
+            <div class="gender-selection">
+                <label>Gender:</label>
+                <div class="radio-group">
+                    <input type="radio" name="gender" value="male" id="male" checked onclick="togglePregnancy()"> 
+                    <label for="male">Male</label>
+                    <input type="radio" name="gender" value="female" id="female" onclick="togglePregnancy()"> 
+                    <label for="female">Female</label>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="input-group" id="preg-group" style="opacity: 0.5; pointer-events: none;">
+                    <label>Pregnancies</label>
+                    <input type="number" id="pregnancies" placeholder="0" disabled>
+                </div>
+                <div class="input-group">
+                    <label>Glucose (mg/dL)</label>
+                    <input type="number" id="glucose" placeholder="e.g. 120" required>
+                </div>
+                <div class="input-group">
+                    <label>Blood Pressure (mm Hg)</label>
+                    <input type="number" id="bp" placeholder="e.g. 80" required>
+                </div>
+                <div class="input-group">
+                    <label>Skin Thickness (mm)</label>
+                    <input type="number" id="skin" placeholder="e.g. 20">
+                </div>
+                <div class="input-group">
+                    <label>Insulin (mu U/ml)</label>
+                    <input type="number" id="insulin" placeholder="e.g. 80">
+                </div>
+                <div class="input-group">
+                    <label>BMI</label>
+                    <input type="number" step="0.1" id="bmi" placeholder="e.g. 22.5" required>
+                </div>
+                <div class="input-group">
+                    <label>Diabetes Pedigree Function</label>
+                    <input type="number" step="0.001" id="dpf" placeholder="e.g. 0.47">
+                </div>
+                <div class="input-group">
+                    <label>Age</label>
+                    <input type="number" id="age" placeholder="Years" required>
+                </div>
+                <div id="result-card" style="display:none;" class="result-card">
+                    <h3>Risk Assessment Result</h3>
+                    <p><strong>Status:</strong> <span id="result-status"></span></p>
+                    <p><strong>Probability:</strong> <span id="result-prob"></span></p>
+                    <div id="risk-bar" class="risk-bar">
+        <div id="risk-fill"></div>
+    </div>
+</div>
+            </div>
+
+            <button type="submit" class="btn-submit">Analyze Health Risk</button>
+        </form>
+    </div>
+</main>
+    </div>
+
+    <script src="script.js">
+       
+    </script>
+</body>
+</html>

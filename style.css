@@ -1,0 +1,297 @@
+/* Sidebar Layout */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--medical-blue);
+    margin-bottom: 2.5rem;
+    padding-left: 1rem;
+}
+
+.menu-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    text-decoration: none;
+    color: #475569;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    transition: 0.2s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background: #f1f5f9;
+    color: var(--medical-blue);
+}
+
+.nav-link.active {
+    background: #e0f2fe;
+    color: var(--medical-blue);
+}
+
+.nav-link .icon {
+    margin-right: 12px;
+    font-size: 1.2rem;
+}
+
+.notif-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: auto;
+}
+
+/* Adjusted Main Content to fit Sidebar */
+.container {
+    margin-left: 260px; /* Offset for sidebar width */
+    max-width: 900px;
+    width: calc(95% - 260px);
+}
+
+.user-profile {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.user-info .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.user-info .role {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #f1f5f9;
+    margin: 1.5rem 0;
+}
+/* Sidebar Layout */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 260px;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 1rem;
+    box-sizing: border-box;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--medical-blue);
+    margin-bottom: 2.5rem;
+    padding-left: 1rem;
+}
+
+.menu-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    text-decoration: none;
+    color: #475569;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    transition: 0.2s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    background: #f1f5f9;
+    color: var(--medical-blue);
+}
+
+.nav-link.active {
+    background: #e0f2fe;
+    color: var(--medical-blue);
+}
+
+.nav-link .icon {
+    margin-right: 12px;
+    font-size: 1.2rem;
+}
+
+.notif-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: auto;
+}
+
+/* Adjusted Main Content to fit Sidebar */
+.container {
+    margin-left: 260px; /* Offset for sidebar width */
+    max-width: 900px;
+    width: calc(95% - 260px);
+}
+
+.user-profile {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 12px;
+}
+
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+}
+
+.user-info .name {
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.user-info .role {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin: 0;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #f1f5f9;
+    margin: 1.5rem 0;
+}
+.health-form {
+    margin-top: 2rem;
+}
+
+.gender-selection {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8fafc;
+    border-radius: 8px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--medical-dark);
+}
+
+.input-group input {
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.btn-submit {
+    grid-column: span 2;
+    margin-top: 30px;
+    width: 100%;
+    background: var(--accent-teal);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-submit:hover {
+    background: #0d9488;
+}
+.result-card {
+    margin-top: 30px;
+    padding: 20px;
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.risk-bar {
+    width: 100%;
+    height: 20px;
+    background: #e2e8f0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+#risk-fill {
+    height: 100%;
+    width: 0%;
+    background: green;
+    transition: width 0.5s ease;
+}
