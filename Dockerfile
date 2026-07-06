@@ -1,12 +1,15 @@
 # --- Build Stage ---
-FROM eclipse-temurin:21-jdk-alpine AS builder
+# Use a glibc-based JDK (not alpine/musl) so the Maven-driven Node build works.
+FROM eclipse-temurin:21-jdk AS builder
 
 WORKDIR /app
 
 # Copy the entire project so maven can find both frontend and backend
 COPY . .
 
-# Run maven from the backend directory where pom.xml is located
+# Run maven from the backend directory where pom.xml is located.
+# This also builds the React frontend (via frontend-maven-plugin) into
+# ../frontend/dist and bundles it into the JAR's static/ folder.
 WORKDIR /app/backend
 RUN chmod +x mvnw && ./mvnw clean package -DskipTests -B
 

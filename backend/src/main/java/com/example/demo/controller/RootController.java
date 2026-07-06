@@ -9,7 +9,8 @@ public class RootController {
     
     @GetMapping("/")
     public String index() {
-        return "forward:/login.html";
+        // Serve the React SPA entry point (built into static/index.html).
+        return "forward:/index.html";
     }
     
     @GetMapping("/favicon.ico")

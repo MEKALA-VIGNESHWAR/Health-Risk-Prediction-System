@@ -27,10 +27,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // Allow static resources without authentication
-                .requestMatchers("/", "/*.html", "/css/**", "/js/**", "/images/**", "/public/**", "/static/**", 
-                                "/*.css", "/*.js", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.svg", "/*.woff", 
-                                "/*.woff2", "/*.ttf", "/*.eot").permitAll()
+                // Allow static resources without authentication.
+                // "/assets/**" covers the Vite/React build output (hashed JS/CSS chunks).
+                .requestMatchers("/", "/*.html", "/assets/**", "/css/**", "/js/**", "/images/**", "/public/**", "/static/**",
+                                "/*.css", "/*.js", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.svg", "/*.webp", "/*.woff",
+                                "/*.woff2", "/*.ttf", "/*.eot", "/*.webmanifest").permitAll()
                 
                 // Public API endpoints - no authentication required
                 .requestMatchers("/api/health", "/api/ping", "/api/status").permitAll()
@@ -38,6 +39,10 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/login").permitAll()
                 .requestMatchers("/api/auth/verify").permitAll()
                 .requestMatchers("/api/predict/**").permitAll()
+                // AI status is a harmless read used by the UI to show demo/live state.
+                // The paid endpoints (/api/ai/chat, /api/ai/symptoms) require a token —
+                // they fall through to the "/api/**" authenticated rule below.
+                .requestMatchers("/api/ai/status").permitAll()
                 .requestMatchers("/api/alerts/**").permitAll()
                 .requestMatchers("/api/doctor/**").permitAll()
                 .requestMatchers("/api/dashboard/**").permitAll()

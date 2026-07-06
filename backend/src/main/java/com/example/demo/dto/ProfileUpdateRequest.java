@@ -1,0 +1,32 @@
+package com.example.demo.dto;
+
+import java.time.LocalDate;
+
+/**
+ * Editable health-profile fields. Sent as a full snapshot by the profile form,
+ * so nulls are applied (clearing a field). Identity fields (username/email/role)
+ * are intentionally NOT editable here.
+ */
+public record ProfileUpdateRequest(
+        String firstName,
+        String lastName,
+        String avatarUrl,
+        String phone,
+        String gender,
+        LocalDate dateOfBirth,
+        Double heightCm,
+        Double weightKg,
+        String bloodGroup,
+        String medicalHistory,
+        String currentMedications,
+        String allergies,
+        String emergencyContactName,
+        String emergencyContactPhone,
+        String emergencyContactRelation,
+        String smokingStatus,
+        String alcoholUse,
+        String exerciseLevel,
+        Double sleepHours,
+        Double waterIntakeLiters
+) {
+}

@@ -10,7 +10,9 @@ RUN chmod +x mvnw && ./mvnw dependency:resolve -B
 
 COPY src src
 
-RUN ./mvnw clean package -DskipTests -B
+# Backend-only image (frontend is served separately, e.g. by nginx),
+# so skip the React build here.
+RUN ./mvnw clean package -DskipTests -B -Dskip.frontend=true
 
 
 # --- Runtime Stage ---
