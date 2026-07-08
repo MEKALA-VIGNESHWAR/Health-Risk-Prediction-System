@@ -5,7 +5,6 @@ import { ProtectedRoute, PublicOnlyRoute } from '@/auth/ProtectedRoute'
 import { LoadingState } from '@/components/ui'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
-import { Home } from '@/pages/Home'
 import { ComingSoon } from '@/pages/ComingSoon'
 import { NotFound } from '@/pages/NotFound'
 
@@ -15,6 +14,7 @@ const SymptomChecker = lazy(() =>
   import('@/pages/SymptomChecker').then((m) => ({ default: m.SymptomChecker })),
 )
 const Profile = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
+const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingState label="Preparing…" />}>{children}</Suspense>
@@ -32,7 +32,7 @@ export default function App() {
       {/* Authenticated app */}
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
-          <Route index element={<Home />} />
+          <Route index element={<Lazy><Dashboard /></Lazy>} />
           <Route path="/assistant" element={<Lazy><Assistant /></Lazy>} />
           <Route path="/symptoms" element={<Lazy><SymptomChecker /></Lazy>} />
           <Route path="/profile" element={<Lazy><Profile /></Lazy>} />

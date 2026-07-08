@@ -33,7 +33,7 @@ export interface NavSection {
 export const NAV: NavSection[] = [
   {
     heading: 'Overview',
-    items: [{ label: 'Home', to: '/', icon: LayoutDashboard, end: true }],
+    items: [{ label: 'Dashboard', to: '/', icon: LayoutDashboard, end: true }],
   },
   {
     heading: 'AI Care',
