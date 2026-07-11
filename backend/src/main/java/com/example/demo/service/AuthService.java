@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -284,6 +285,77 @@ public class AuthService {
         }
 
         return null;
+    }
+
+    // Concurrent map to hold temporary reset tokens (token -> email)
+    private final Map<String, String> resetTokens = new java.util.concurrent.ConcurrentHashMap<>();
+
+    /**
+     * Request a password reset token
+     */
+    public String forgotPassword(String email) {
+        log.info("Password reset requested for email: {}", email);
+        if (email == null || email.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(email.trim());
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("No user found with this email address");
+        }
+
+        String token = UUID.randomUUID().toString();
+        resetTokens.put(token, email.trim());
+        log.info("Generated password reset token: {} for email: {}", token, email);
+        return token;
+    }
+
+    /**
+     * Reset password using token
+     */
+    public void resetPassword(String token, String newPassword) {
+        log.info("Attempting password reset with token: {}", token);
+        if (token == null || token.trim().isEmpty()) {
+            throw new IllegalArgumentException("Token is required");
+        }
+        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 6) {
+            throw new IllegalArgumentException("Password must be at least 6 characters");
+        }
+
+        String email = resetTokens.get(token.trim());
+        if (email == null) {
+            throw new IllegalArgumentException("Invalid or expired password reset token");
+        }
+
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            throw new IllegalArgumentException("User no longer exists");
+        }
+
+        User user = userOpt.get();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setUpdatedDate(System.currentTimeMillis());
+        userRepository.save(user);
+        
+        resetTokens.remove(token.trim());
+        log.info("Password successfully updated for user: {}", user.getUsername());
+    }
+
+    /**
+     * Verify email with a code
+     */
+    public boolean verifyEmail(String email, String code) {
+        log.info("Email verification requested for email: {} with code: {}", email, code);
+        if (email == null || email.trim().isEmpty() || code == null || code.trim().isEmpty()) {
+            throw new IllegalArgumentException("Email and verification code are required");
+        }
+        
+        // Simulating email verification - accept any 6-digit code or default "123456" for testing
+        if (code.length() != 6) {
+            throw new IllegalArgumentException("Verification code must be exactly 6 digits");
+        }
+        
+        return true;
     }
 
     /**

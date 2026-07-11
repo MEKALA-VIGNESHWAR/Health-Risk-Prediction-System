@@ -24,6 +24,7 @@
         <!-- Frontend (React/Vite) build -->
         <node.version>v22.12.0</node.version>
         <skip.frontend>false</skip.frontend>
+        <lombok.version>1.18.46</lombok.version>
     </properties>
 
     <dependencies>
@@ -94,6 +95,24 @@
 
     <build>
         <plugins>
+            <!-- Java Compiler Configuration with Lombok Annotation Processor -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <!-- Build the React/Vite frontend (produces ../frontend/dist).
                  Runs a self-contained Node install so `mvn package` builds the
                  whole app in one command on any platform. Skip with

@@ -72,9 +72,9 @@ export function Login() {
             <input type="checkbox" className="h-4 w-4 rounded border-line text-brand-500 focus:ring-brand-500/30" />
             Remember me
           </label>
-          <button type="button" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
+          <Link to="/forgot-password" className="text-sm font-semibold text-brand-600 hover:text-brand-700">
             Forgot password?
-          </button>
+          </Link>
         </div>
 
         <Button type="submit" fullWidth size="lg" loading={loading} rightIcon={<ArrowRight className="h-4.5 w-4.5" />}>

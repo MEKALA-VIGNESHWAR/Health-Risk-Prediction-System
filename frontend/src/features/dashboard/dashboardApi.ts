@@ -13,6 +13,8 @@ export interface DiabetesPrediction {
   riskPercentage: number // 0..100
   createdAt: string
   predictionTimestamp: number
+  featureImportance?: string
+  recommendations?: string
 }
 
 export interface HeartPrediction {
@@ -26,6 +28,8 @@ export interface HeartPrediction {
   riskPercentage: number
   createdAt: string
   predictionTimestamp: number
+  featureImportance?: string
+  recommendations?: string
 }
 
 export interface Alert {

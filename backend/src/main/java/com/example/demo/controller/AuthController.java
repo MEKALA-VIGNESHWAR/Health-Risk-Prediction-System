@@ -232,6 +232,78 @@ public class AuthController {
     }
 
     /**
+     * Forgot Password
+     * POST /api/auth/forgot-password
+     */
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody java.util.Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String token = authService.forgotPassword(email);
+            return ResponseEntity.ok(java.util.Map.of(
+                    "success", true, 
+                    "message", "Password reset instructions sent.",
+                    "token", token
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to send reset link: " + e.getMessage(), 
+                            HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+    }
+
+    /**
+     * Reset Password
+     * POST /api/auth/reset-password
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody java.util.Map<String, String> request) {
+        try {
+            String token = request.get("token");
+            String newPassword = request.get("newPassword");
+            authService.resetPassword(token, newPassword);
+            return ResponseEntity.ok(java.util.Map.of(
+                    "success", true, 
+                    "message", "Password updated successfully."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Failed to reset password: " + e.getMessage(), 
+                            HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+    }
+
+    /**
+     * Email Verification
+     * POST /api/auth/verify-email
+     */
+    @PostMapping("/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestBody java.util.Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String code = request.get("code");
+            authService.verifyEmail(email, code);
+            return ResponseEntity.ok(java.util.Map.of(
+                    "success", true, 
+                    "message", "Email verified successfully."
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ErrorResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ErrorResponse("Verification failed: " + e.getMessage(), 
+                            HttpStatus.INTERNAL_SERVER_ERROR.value()));
+        }
+    }
+
+    /**
      * Error response class
      */
     @lombok.Data

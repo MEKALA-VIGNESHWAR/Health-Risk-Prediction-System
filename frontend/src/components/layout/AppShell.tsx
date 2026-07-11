@@ -7,14 +7,29 @@ import { Topbar } from './Topbar'
 
 export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('aura-sidebar-collapsed') === 'true'
+    } catch {
+      return false
+    }
+  })
   const location = useLocation()
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('aura-sidebar-collapsed', String(sidebarCollapsed))
+    } catch {
+      /* ignore */
+    }
+  }, [sidebarCollapsed])
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => setMobileOpen(false), [location.pathname])
 
   return (
     <div className="flex min-h-dvh">
-      <Sidebar />
+      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
       {/* Mobile drawer */}
       <AnimatePresence>

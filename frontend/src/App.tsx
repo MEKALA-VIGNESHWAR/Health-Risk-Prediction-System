@@ -5,6 +5,9 @@ import { ProtectedRoute, PublicOnlyRoute } from '@/auth/ProtectedRoute'
 import { LoadingState } from '@/components/ui'
 import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
+import { ForgotPassword } from '@/pages/ForgotPassword'
+import { ResetPassword } from '@/pages/ResetPassword'
+import { VerifyEmail } from '@/pages/VerifyEmail'
 import { ComingSoon } from '@/pages/ComingSoon'
 import { NotFound } from '@/pages/NotFound'
 
@@ -15,6 +18,12 @@ const SymptomChecker = lazy(() =>
 )
 const Profile = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
 const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
+const History = lazy(() => import('@/pages/History').then((m) => ({ default: m.History })))
+const Nutrition = lazy(() => import('@/pages/Nutrition').then((m) => ({ default: m.Nutrition })))
+const Fitness = lazy(() => import('@/pages/Fitness').then((m) => ({ default: m.Fitness })))
+const Reminders = lazy(() => import('@/pages/Reminders').then((m) => ({ default: m.Reminders })))
+const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
+const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingState label="Preparing…" />}>{children}</Suspense>
@@ -27,6 +36,9 @@ export default function App() {
       <Route element={<PublicOnlyRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Route>
 
       {/* Authenticated app */}
@@ -36,12 +48,14 @@ export default function App() {
           <Route path="/assistant" element={<Lazy><Assistant /></Lazy>} />
           <Route path="/symptoms" element={<Lazy><SymptomChecker /></Lazy>} />
           <Route path="/profile" element={<Lazy><Profile /></Lazy>} />
-          <Route path="/predictions" element={<ComingSoon />} />
+          <Route path="/history" element={<Lazy><History /></Lazy>} />
           <Route path="/analytics" element={<ComingSoon />} />
           <Route path="/reports" element={<ComingSoon />} />
-          <Route path="/nutrition" element={<ComingSoon />} />
-          <Route path="/fitness" element={<ComingSoon />} />
-          <Route path="/reminders" element={<ComingSoon />} />
+          <Route path="/nutrition" element={<Lazy><Nutrition /></Lazy>} />
+          <Route path="/fitness" element={<Lazy><Fitness /></Lazy>} />
+          <Route path="/reminders" element={<Lazy><Reminders /></Lazy>} />
+          <Route path="/settings" element={<Lazy><Settings /></Lazy>} />
+          <Route path="/admin" element={<Lazy><Admin /></Lazy>} />
         </Route>
       </Route>
 

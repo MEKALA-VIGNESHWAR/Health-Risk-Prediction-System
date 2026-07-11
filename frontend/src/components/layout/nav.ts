@@ -9,6 +9,8 @@ import {
   Dumbbell,
   FileText,
   UserRound,
+  Settings,
+  Shield,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -45,7 +47,7 @@ export const NAV: NavSection[] = [
   {
     heading: 'Health',
     items: [
-      { label: 'Predictions', to: '/predictions', icon: Activity, soon: true },
+      { label: 'Health History', to: '/history', icon: Activity },
       { label: 'Analytics', to: '/analytics', icon: LineChart, soon: true },
       { label: 'Reports', to: '/reports', icon: FileText, soon: true },
     ],
@@ -53,13 +55,17 @@ export const NAV: NavSection[] = [
   {
     heading: 'Lifestyle',
     items: [
-      { label: 'Nutrition', to: '/nutrition', icon: Apple, soon: true },
-      { label: 'Fitness', to: '/fitness', icon: Dumbbell, soon: true },
-      { label: 'Reminders', to: '/reminders', icon: BellRing, soon: true },
+      { label: 'Nutrition', to: '/nutrition', icon: Apple },
+      { label: 'Fitness', to: '/fitness', icon: Dumbbell },
+      { label: 'Reminders', to: '/reminders', icon: BellRing },
     ],
   },
   {
     heading: 'Account',
-    items: [{ label: 'My Profile', to: '/profile', icon: UserRound }],
+    items: [
+      { label: 'My Profile', to: '/profile', icon: UserRound },
+      { label: 'Settings', to: '/settings', icon: Settings },
+      { label: 'Admin Panel', to: '/admin', icon: Shield },
+    ],
   },
 ]

@@ -95,6 +95,10 @@ public class DiabetesPrediction {
     @Column(name = "feature_importance", columnDefinition = "TEXT")
     private String featureImportance;
 
+    // ===== RECOMMENDATIONS (JSON stored as string) =====
+    @Column(name = "recommendations", columnDefinition = "TEXT")
+    private String recommendations;
+
     // ===== METADATA =====
     @Column(name = "prediction_timestamp")
     private Long predictionTimestamp;

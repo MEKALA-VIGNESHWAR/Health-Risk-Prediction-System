@@ -121,7 +121,7 @@ public class DiabetesPredictionService {
 
             // Save prediction to database
             DiabetesPrediction dbPrediction = savePrediction(request, prediction, probabilities,
-                    message, riskLevel, riskPercentage, confidenceLevel, confidenceText, featureImportance);
+                    message, riskLevel, riskPercentage, confidenceLevel, confidenceText, featureImportance, recommendations);
             response.setPredictionId(dbPrediction.getId().toString());
 
             // Auto-generate alerts
@@ -488,7 +488,8 @@ public class DiabetesPredictionService {
     private DiabetesPrediction savePrediction(DiabetesPredictionRequest request, int prediction,
                                                double[] probabilities, String message, String riskLevel,
                                                double riskPercentage, double confidenceLevel,
-                                               String confidenceText, Map<String, Double> featureImportance) {
+                                               String confidenceText, Map<String, Double> featureImportance,
+                                               List<Map<String, String>> recommendations) {
         DiabetesPrediction dbPrediction = new DiabetesPrediction();
 
         if (request.getUserId() != null) {
@@ -531,6 +532,14 @@ public class DiabetesPredictionService {
             dbPrediction.setFeatureImportance(json.toString());
         } catch (Exception e) {
             dbPrediction.setFeatureImportance("{}");
+        }
+
+        // Recommendations as JSON
+        try {
+            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            dbPrediction.setRecommendations(mapper.writeValueAsString(recommendations));
+        } catch (Exception e) {
+            log.error("Error serializing recommendations: {}", e.getMessage());
         }
 
         return predictionRepository.save(dbPrediction);

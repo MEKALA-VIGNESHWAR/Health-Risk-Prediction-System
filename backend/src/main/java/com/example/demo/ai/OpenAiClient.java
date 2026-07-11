@@ -87,6 +87,74 @@ public class OpenAiClient {
                         ex -> new AiException("The AI service is temporarily unavailable.", ex));
     }
 
+    // ── Vision / OCR completions ──────────────────────────────────────────
+    public Mono<String> completeWithImage(String prompt, String base64Image, String mimeType, double temperature) {
+        if (!props.isConfigured()) {
+            return Mono.just(simulatedReportAnalysis(prompt));
+        }
+
+        try {
+            ObjectNode body = mapper.createObjectNode();
+            body.put("model", props.getModel());
+            body.put("temperature", temperature);
+            body.put("max_tokens", 1500);
+
+            ArrayNode messages = body.putArray("messages");
+            ObjectNode userMessage = messages.addObject();
+            userMessage.put("role", "user");
+
+            ArrayNode contentArray = userMessage.putArray("content");
+            
+            // Text prompt
+            ObjectNode textContent = contentArray.addObject();
+            textContent.put("type", "text");
+            textContent.put("text", prompt);
+
+            // Image attachment
+            ObjectNode imageContent = contentArray.addObject();
+            imageContent.put("type", "image_url");
+            ObjectNode imageUrl = imageContent.putObject("image_url");
+            imageUrl.put("url", "data:" + mimeType + ";base64," + base64Image);
+
+            return webClient.post()
+                    .uri("/chat/completions")
+                    .header("Authorization", "Bearer " + props.getApiKey())
+                    .bodyValue(body)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .map(this::extractMessageContent)
+                    .onErrorMap(WebClientResponseException.class, this::mapHttpError)
+                    .onErrorMap(ex -> !(ex instanceof AiException),
+                            ex -> new AiException("The AI Vision service is temporarily unavailable.", ex));
+
+        } catch (Exception e) {
+            return Mono.error(new AiException("Failed to prepare Vision request", e));
+        }
+    }
+
+    private String simulatedReportAnalysis(String prompt) {
+        return "{\n" +
+                "  \"patientName\": \"Demo Patient\",\n" +
+                "  \"reportDate\": \"2026-07-09\",\n" +
+                "  \"labName\": \"AuraHealth Demo Lab\",\n" +
+                "  \"summary\": \"The uploaded report shows normal metabolic parameters with a slightly elevated fasting blood glucose level.\",\n" +
+                "  \"parameters\": [\n" +
+                "    { \"name\": \"Fasting Glucose\", \"value\": \"105 mg/dL\", \"normalRange\": \"70-100 mg/dL\", \"status\": \"ELEVATED\", \"comments\": \"Slightly above normal. Suggests mild impaired fasting glucose.\" },\n" +
+                "    { \"name\": \"Total Cholesterol\", \"value\": \"185 mg/dL\", \"normalRange\": \"<200 mg/dL\", \"status\": \"NORMAL\", \"comments\": \"Healthy level.\" },\n" +
+                "    { \"name\": \"Hemoglobin\", \"value\": \"14.5 g/dL\", \"normalRange\": \"13.5-17.5 g/dL\", \"status\": \"NORMAL\", \"comments\": \"Healthy levels.\" }\n" +
+                "  ],\n" +
+                "  \"abnormalities\": [\n" +
+                "    { \"name\": \"Fasting Glucose\", \"value\": \"105 mg/dL\", \"status\": \"ELEVATED\" }\n" +
+                "  ],\n" +
+                "  \"guidelines\": [\n" +
+                "    \"Monitor daily fasting blood sugar and check HbA1c in 3 months.\",\n" +
+                "    \"Increase active cardio exercises to 150 minutes per week.\",\n" +
+                "    \"Minimize intake of simple starches, sugars, and trans-fats.\"\n" +
+                "  ],\n" +
+                "  \"status\": \"WARNING\"\n" +
+                "}";
+    }
+
     // ── Helpers ─────────────────────────────────────────────────────────────
     private ObjectNode buildBody(List<AiMessage> messages, double temperature,
                                  boolean stream, boolean jsonMode) {
