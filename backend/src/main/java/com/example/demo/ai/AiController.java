@@ -3,6 +3,12 @@ package com.example.demo.ai;
 import com.example.demo.ai.dto.ChatRequest;
 import com.example.demo.ai.dto.SymptomRequest;
 import com.example.demo.ai.dto.SymptomResponse;
+import com.example.demo.entity.ChatSession;
+import com.example.demo.entity.ChatMessageEntity;
+import com.example.demo.entity.User;
+import com.example.demo.repository.ChatSessionRepositoryJPA;
+import com.example.demo.repository.ChatMessageRepositoryJPA;
+import com.example.demo.repository.UserRepositoryJPA;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
@@ -12,7 +18,10 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 /**
  * AI endpoints: streaming health-assistant chat and structured symptom triage.
@@ -28,13 +37,22 @@ public class AiController {
     private final SymptomService symptomService;
     private final AiProperties props;
     private final ObjectMapper mapper;
+    private final ChatSessionRepositoryJPA sessionRepository;
+    private final ChatMessageRepositoryJPA messageRepository;
+    private final UserRepositoryJPA userRepository;
 
     public AiController(ChatService chatService, SymptomService symptomService,
-                        AiProperties props, ObjectMapper mapper) {
+                        AiProperties props, ObjectMapper mapper,
+                        ChatSessionRepositoryJPA sessionRepository,
+                        ChatMessageRepositoryJPA messageRepository,
+                        UserRepositoryJPA userRepository) {
         this.chatService = chatService;
         this.symptomService = symptomService;
         this.props = props;
         this.mapper = mapper;
+        this.sessionRepository = sessionRepository;
+        this.messageRepository = messageRepository;
+        this.userRepository = userRepository;
     }
 
     @GetMapping("/status")
@@ -64,6 +82,46 @@ public class AiController {
     @PostMapping("/symptoms")
     public Mono<SymptomResponse> symptoms(@RequestBody SymptomRequest request) {
         return symptomService.analyze(request);
+    }
+
+    @GetMapping("/sessions")
+    public List<ChatSession> getSessions(Authentication auth) {
+        User user = currentUserObject(auth);
+        return sessionRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
+    }
+
+    @GetMapping("/sessions/{id}/messages")
+    public List<ChatMessageEntity> getSessionMessages(@PathVariable String id) {
+        UUID sessionId = UUID.fromString(id);
+        return messageRepository.findBySessionIdOrderByCreatedAtAsc(sessionId);
+    }
+
+    @PostMapping("/sessions")
+    public ChatSession createSession(Authentication auth) {
+        User user = currentUserObject(auth);
+        ChatSession session = new ChatSession();
+        session.setUserId(user.getId());
+        session.setTitle("New Health Chat");
+        return sessionRepository.save(session);
+    }
+
+    @DeleteMapping("/sessions/{id}")
+    @org.springframework.transaction.annotation.Transactional
+    public Map<String, Object> deleteSession(@PathVariable String id) {
+        UUID sessionId = UUID.fromString(id);
+        messageRepository.deleteBySessionId(sessionId);
+        sessionRepository.deleteById(sessionId);
+        return Map.of("success", true);
+    }
+
+    private User currentUserObject(Authentication auth) {
+        if (auth == null || auth.getName() == null) {
+            List<User> list = userRepository.findAll();
+            if (list.isEmpty()) throw new RuntimeException("No users found");
+            return list.get(0);
+        }
+        return userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
     // ── helpers ─────────────────────────────────────────────────────────────

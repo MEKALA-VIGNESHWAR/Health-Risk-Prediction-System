@@ -48,8 +48,9 @@ export const NAV: NavSection[] = [
     heading: 'Health',
     items: [
       { label: 'Health History', to: '/history', icon: Activity },
-      { label: 'Analytics', to: '/analytics', icon: LineChart, soon: true },
-      { label: 'Reports', to: '/reports', icon: FileText, soon: true },
+      { label: 'Predictions', to: '/predictions', icon: Activity },
+      { label: 'Analytics', to: '/analytics', icon: LineChart },
+      { label: 'Reports', to: '/reports', icon: FileText },
     ],
   },
   {

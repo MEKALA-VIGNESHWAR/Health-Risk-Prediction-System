@@ -1,15 +1,19 @@
 package com.example.demo.controller;
 
+import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepositoryJPA;
 import com.example.demo.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -30,6 +34,7 @@ import java.util.UUID;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final UserRepositoryJPA userRepository;
 
     /**
      * GET /api/dashboard/summary
@@ -261,6 +266,98 @@ public class DashboardController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse("error", "Failed to fetch insights: " + e.getMessage(), null));
         }
+    }
+
+    /**
+     * GET /api/dashboard
+     * Returns personal dashboard summary for the logged-in user
+     */
+    @GetMapping
+    public ResponseEntity<?> getPersonalDashboard(Authentication auth) {
+        try {
+            Optional<User> user = currentUser(auth);
+            if (user.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse("error", "User not authenticated", null));
+            }
+            Map<String, Object> data = dashboardService.getPersonalDashboard(user.get().getId());
+            return ResponseEntity.ok(new ApiResponse("success", "Dashboard data retrieved", data));
+        } catch (Exception e) {
+            log.error("Error retrieving personal dashboard: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("error", "Failed to retrieve dashboard: " + e.getMessage(), null));
+        }
+    }
+
+    /**
+     * GET /api/dashboard/charts
+     * Returns historical vitals charts data for the logged-in user
+     */
+    @GetMapping("/charts")
+    public ResponseEntity<?> getChartsData(Authentication auth) {
+        try {
+            Optional<User> user = currentUser(auth);
+            if (user.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse("error", "User not authenticated", null));
+            }
+            Map<String, Object> charts = dashboardService.getChartsData(user.get().getId());
+            return ResponseEntity.ok(new ApiResponse("success", "Charts data retrieved", charts));
+        } catch (Exception e) {
+            log.error("Error retrieving charts data: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("error", "Failed to retrieve charts data", null));
+        }
+    }
+
+    /**
+     * GET /api/dashboard/insights
+     * Returns dynamic AI insights based on vitals logs for the logged-in user
+     */
+    @GetMapping("/insights")
+    public ResponseEntity<?> getVitalsInsights(Authentication auth) {
+        try {
+            Optional<User> user = currentUser(auth);
+            if (user.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse("error", "User not authenticated", null));
+            }
+            List<String> insights = dashboardService.getAIInsights(user.get().getId());
+            return ResponseEntity.ok(new ApiResponse("success", "Insights retrieved", insights));
+        } catch (Exception e) {
+            log.error("Error retrieving insights: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("error", "Failed to retrieve insights", null));
+        }
+    }
+
+    /**
+     * POST /api/dashboard/log
+     * Logs today's vitals (water, sleep, calories, exercise, etc.)
+     */
+    @PostMapping("/log")
+    public ResponseEntity<?> logVitals(@RequestBody Map<String, Object> payload, Authentication auth) {
+        try {
+            Optional<User> user = currentUser(auth);
+            if (user.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse("error", "User not authenticated", null));
+            }
+            var vitals = dashboardService.logVitals(user.get().getId(), payload);
+            return ResponseEntity.ok(new ApiResponse("success", "Vitals logged successfully", vitals));
+        } catch (Exception e) {
+            log.error("Error logging vitals: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse("error", "Failed to log vitals: " + e.getMessage(), null));
+        }
+    }
+
+    private Optional<User> currentUser(Authentication auth) {
+        if (auth == null || auth.getName() == null) {
+            List<User> users = userRepository.findAll();
+            return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+        }
+        return userRepository.findByUsername(auth.getName());
     }
 
     /**

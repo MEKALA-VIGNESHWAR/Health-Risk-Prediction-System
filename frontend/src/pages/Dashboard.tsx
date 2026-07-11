@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useEffect, useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   Sparkles,
@@ -17,8 +17,10 @@ import {
   Pill,
   FileText,
   Check,
+  Plus,
+  TrendingUp,
 } from 'lucide-react'
-import { Badge, Button, Card, MetricCard, SkeletonLoader, useToast, Modal } from '@/components/ui'
+import { Badge, Button, Card, MetricCard, SkeletonLoader, useToast, Modal, Input } from '@/components/ui'
 import { useAuth } from '@/auth/AuthContext'
 import { useDashboard } from '@/features/dashboard/useDashboard'
 import { ScoreRing } from '@/components/dashboard/ScoreRing'
@@ -26,6 +28,24 @@ import { TrendsChart } from '@/components/dashboard/TrendsChart'
 import { RiskCard } from '@/components/dashboard/RiskCard'
 import type { Recommendation } from '@/features/dashboard/metrics'
 import { cn } from '@/lib/cn'
+import {
+  fetchPersonalDashboard,
+  fetchChartsData,
+  logVitals,
+  type PersonalDashboard,
+  type ChartsData,
+} from '@/features/dashboard/dashboardApi'
+import {
+  Area,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ComposedChart,
+  Line,
+} from 'recharts'
 
 function greeting(): string {
   const h = new Date().getHours()
@@ -65,12 +85,117 @@ const TIPS = [
 
 export function Dashboard() {
   const { displayName } = useAuth()
-  const { loading, metrics, data } = useDashboard()
-  const { success } = useToast()
-  const navigate = useNavigate()
+  const { loading: initialLoading, metrics, data } = useDashboard()
+  const { success, error } = useToast()
   const firstName = displayName.split(' ')[0]
 
+  // Personal tracker & charts states
+  const [personalDash, setPersonalDash] = useState<PersonalDashboard | null>(null)
+  const [chartsData, setChartsData] = useState<ChartsData | null>(null)
+  const [vitalsLoading, setVitalsLoading] = useState(true)
+  const [chartTab, setChartTab] = useState<'risk' | 'bmi' | 'sleep' | 'sugar' | 'bp' | 'heartRate'>('risk')
+
+  // Log Vitals Modal State
+  const [vitalsModalOpen, setVitalsModalOpen] = useState(false)
+  const [logWeight, setLogWeight] = useState('')
+  const [logSystolic, setLogSystolic] = useState('')
+  const [logDiastolic, setLogDiastolic] = useState('')
+  const [logGlucose, setLogGlucose] = useState('')
+  const [logHeartRate, setLogHeartRate] = useState('')
+  const [logSleep, setLogSleep] = useState('')
+  const [logCaloriesC, setLogCaloriesC] = useState('')
+  const [logCaloriesB, setLogCaloriesB] = useState('')
+  const [logExercise, setLogExercise] = useState('')
+  const [submittingVitals, setSubmittingVitals] = useState(false)
+
+  // Details Modal state
   const [selectedReport, setSelectedReport] = useState<any | null>(null)
+
+  const loadPersonalData = async () => {
+    try {
+      const [dash, charts] = await Promise.all([
+        fetchPersonalDashboard(),
+        fetchChartsData(),
+      ])
+      setPersonalDash(dash)
+      setChartsData(charts)
+    } catch (e) {
+      console.error('Failed to load tracker logs', e)
+    } finally {
+      setVitalsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadPersonalData()
+  }, [])
+
+  const handleQuickWater = async (amount: number) => {
+    const current = personalDash?.today?.waterIntakeMl || 0
+    try {
+      await logVitals({ waterIntakeMl: current + amount })
+      success(`Logged +${amount}ml water!`, { title: 'Hydration Saved' })
+      loadPersonalData()
+    } catch (e) {
+      error('Failed to log water intake.')
+    }
+  }
+
+  const handleQuickExercise = async (minutes: number) => {
+    const current = personalDash?.today?.exerciseMinutes || 0
+    try {
+      await logVitals({ exerciseMinutes: current + minutes })
+      success(`Logged +${minutes}m workout!`, { title: 'Exercise Saved' })
+      loadPersonalData()
+    } catch (e) {
+      error('Failed to log exercise.')
+    }
+  }
+
+  const handleQuickSleep = async (hours: number) => {
+    try {
+      await logVitals({ sleepHours: hours })
+      success(`Logged ${hours}h of sleep!`, { title: 'Sleep Saved' })
+      loadPersonalData()
+    } catch (e) {
+      error('Failed to log sleep.')
+    }
+  }
+
+  const handleLogVitalsSubmit = async () => {
+    setSubmittingVitals(true)
+    const payload: Record<string, any> = {}
+    if (logWeight) payload.weightKg = parseFloat(logWeight)
+    if (logSystolic) payload.systolicBp = parseInt(logSystolic)
+    if (logDiastolic) payload.diastolicBp = parseInt(logDiastolic)
+    if (logGlucose) payload.bloodSugar = parseInt(logGlucose)
+    if (logHeartRate) payload.heartRate = parseInt(logHeartRate)
+    if (logSleep) payload.sleepHours = parseFloat(logSleep)
+    if (logCaloriesC) payload.caloriesConsumed = parseInt(logCaloriesC)
+    if (logCaloriesB) payload.caloriesBurned = parseInt(logCaloriesB)
+    if (logExercise) payload.exerciseMinutes = parseInt(logExercise)
+
+    try {
+      await logVitals(payload)
+      success('Health metrics logged successfully!', { title: 'Vitals Logged' })
+      setVitalsModalOpen(false)
+      loadPersonalData()
+      // clear inputs
+      setLogWeight('')
+      setLogSystolic('')
+      setLogDiastolic('')
+      setLogGlucose('')
+      setLogHeartRate('')
+      setLogSleep('')
+      setLogCaloriesC('')
+      setLogCaloriesB('')
+      setLogExercise('')
+    } catch (e) {
+      error('Failed to log vitals.')
+    } finally {
+      setSubmittingVitals(false)
+    }
+  }
 
   const reports = useMemo(() => {
     if (!data) return []
@@ -128,7 +253,6 @@ export function Dashboard() {
       })
     })
 
-    // Sort by timestamp descending
     return list.sort((a, b) => b.timestamp - a.timestamp).slice(0, 4)
   }, [data])
 
@@ -202,6 +326,19 @@ export function Dashboard() {
     success(`Intake of ${name} logged successfully!`, { title: 'Medication Tracked' })
   }
 
+  // Active tracker targets
+  const waterTarget = 2000
+  const sleepTarget = 8.0
+  const exerciseTarget = 30
+
+  const waterToday = personalDash?.today?.waterIntakeMl || 0
+  const sleepToday = personalDash?.today?.sleepHours || 0.0
+  const exerciseToday = personalDash?.today?.exerciseMinutes || 0
+
+  const waterPercent = Math.min(100, Math.round((waterToday / waterTarget) * 100))
+  const sleepPercent = Math.min(100, Math.round((sleepToday / sleepTarget) * 100))
+  const exercisePercent = Math.min(100, Math.round((exerciseToday / exerciseTarget) * 100))
+
   return (
     <div className="space-y-6">
       {/* ── Hero + Health Score ─────────────────────────────────────────── */}
@@ -221,35 +358,34 @@ export function Dashboard() {
                 {greeting()}, {firstName}.
               </h1>
               <p className="mt-2 text-brand-50/90">
-                Here's a snapshot of your health today. {metrics && metrics.totalPredictions === 0
-                  ? 'Run your first risk check to unlock personalized insights.'
-                  : 'Keep up the great work on your wellness journey.'}
+                Here's a snapshot of your health today. {personalDash?.streak && personalDash.streak > 0
+                  ? `You are on a ${personalDash.streak}-day health streak! Keep it up.`
+                  : 'Start logging your metrics to track your weekly streak.'}
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3 lg:justify-start">
                 <Link to="/assistant">
                   <Button variant="coral" leftIcon={<Sparkles className="h-4 w-4" />}>Ask AuraHealth</Button>
                 </Link>
-                <Link to="/predictions">
-                  <Button
-                    className="!bg-white/15 !text-white ring-1 ring-inset ring-white/25 hover:!bg-white/25"
-                    leftIcon={<Activity className="h-4 w-4" />}
-                  >
-                    New risk check
-                  </Button>
-                </Link>
+                <Button
+                  onClick={() => setVitalsModalOpen(true)}
+                  className="!bg-white/15 !text-white ring-1 ring-inset ring-white/25 hover:!bg-white/25"
+                  leftIcon={<Plus className="h-4 w-4" />}
+                >
+                  Log Health Metrics
+                </Button>
               </div>
             </div>
 
             {/* Health score ring */}
             <div className="shrink-0 rounded-3xl bg-white/10 p-5 ring-1 ring-inset ring-white/20 backdrop-blur-sm">
-              {loading || !metrics ? (
+              {vitalsLoading || !personalDash ? (
                 <div className="grid h-[168px] w-[168px] place-items-center">
                   <div className="h-32 w-32 animate-pulse-soft rounded-full bg-white/20" />
                 </div>
               ) : (
                 <div className="text-center">
                   <div className="[&_p]:!text-white">
-                    <ScoreRing score={metrics.healthScore} label={metrics.scoreLabel} />
+                    <ScoreRing score={personalDash.healthScore} label={personalDash.scoreLabel} />
                   </div>
                   <p className="mt-1 text-xs font-medium uppercase tracking-wider text-brand-50/80">
                     Health Score
@@ -262,7 +398,7 @@ export function Dashboard() {
       </motion.div>
 
       {/* ── Stat strip ──────────────────────────────────────────────────── */}
-      {loading || !metrics ? (
+      {initialLoading || !metrics ? (
         <SkeletonLoader type="metric" count={4} className="grid grid-cols-2 gap-4 lg:grid-cols-4" />
       ) : (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -279,16 +415,15 @@ export function Dashboard() {
             colorScheme="coral"
           />
           <MetricCard
-            title="Profile"
-            value={metrics.profileCompletion}
-            unit="%"
-            icon={<UserIcon className="h-5 w-5" />}
+            title="Logging streak"
+            value={personalDash?.streak || 0}
+            unit=" Days"
+            icon={<TrendingUp className="h-5 w-5" />}
             colorScheme="info"
-            onClick={() => navigate('/profile')}
           />
           <MetricCard
             title="Health score"
-            value={metrics.healthScore}
+            value={personalDash?.healthScore || 70}
             icon={<HeartPulse className="h-5 w-5" />}
             colorScheme="gold"
           />
@@ -297,7 +432,7 @@ export function Dashboard() {
 
       {/* ── Risk cards ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {loading || !metrics ? (
+        {initialLoading || !metrics ? (
           <SkeletonLoader type="card" count={2} className="grid grid-cols-1 gap-4 sm:grid-cols-2" />
         ) : (
           <>
@@ -310,36 +445,87 @@ export function Dashboard() {
       {/* ── Trends + Recommendations ────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card padding="lg" className="lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500/10 text-brand-600">
                 <LineChart className="h-5 w-5" />
               </span>
-              <h3 className="font-semibold text-ink">Risk Trends</h3>
+              <h3 className="font-semibold text-ink">Health Trends</h3>
             </div>
-            <div className="flex items-center gap-4 text-xs">
-              <span className="flex items-center gap-1.5 text-ink-muted">
-                <span className="h-2.5 w-2.5 rounded-full bg-brand-500" /> Diabetes
-              </span>
-              <span className="flex items-center gap-1.5 text-ink-muted">
-                <span className="h-2.5 w-2.5 rounded-full bg-coral-400" /> Heart
-              </span>
+            
+            {/* Chart Tab Selector */}
+            <div className="flex flex-wrap gap-1.5 rounded-lg border border-line bg-surface p-1 text-[11px] font-bold">
+              {(['risk', 'bmi', 'sleep', 'sugar', 'bp', 'heartRate'] as const).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setChartTab(tab)}
+                  className={cn(
+                    'rounded px-2.5 py-1 transition-all capitalize',
+                    chartTab === tab ? 'bg-brand-500 text-white shadow-soft' : 'text-ink-subtle hover:text-ink'
+                  )}
+                >
+                  {tab === 'risk' ? 'risks' : tab}
+                </button>
+              ))}
             </div>
           </div>
-          {loading ? (
+
+          {initialLoading || vitalsLoading ? (
             <div className="skeleton h-[260px] rounded-xl" />
-          ) : metrics && metrics.timeline.length > 0 ? (
-            <TrendsChart points={metrics.timeline} />
-          ) : (
-            <div className="flex h-[260px] flex-col items-center justify-center text-center">
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-500/10 text-brand-500">
-                <LineChart className="h-6 w-6" />
+          ) : chartTab === 'risk' ? (
+            metrics && metrics.timeline.length > 0 ? (
+              <TrendsChart points={metrics.timeline} />
+            ) : (
+              <div className="flex h-[260px] flex-col items-center justify-center text-center">
+                <div className="grid h-14 w-14 place-items-center rounded-2xl bg-brand-500/10 text-brand-500">
+                  <LineChart className="h-6 w-6" />
+                </div>
+                <p className="mt-3 font-semibold text-ink">No risk trends yet</p>
+                <p className="mt-1 max-w-xs text-sm text-ink-muted">Run a diabetes check to display history.</p>
               </div>
-              <p className="mt-3 font-semibold text-ink">No trend data yet</p>
-              <p className="mt-1 max-w-xs text-sm text-ink-muted">
-                Your risk history will chart here after you run a couple of checks.
-              </p>
-            </div>
+            )
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <ComposedChart
+                data={
+                  chartTab === 'bmi'
+                    ? chartsData?.bmi
+                    : chartTab === 'sleep'
+                    ? chartsData?.sleep
+                    : chartTab === 'sugar'
+                    ? chartsData?.sugar
+                    : chartTab === 'bp'
+                    ? chartsData?.bp
+                    : chartsData?.heartRate
+                }
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--line)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} width={30} />
+                <Tooltip />
+                {chartTab === 'bmi' && (
+                  <>
+                    <Area type="monotone" name="Weight (kg)" dataKey="weight" fill="#0FA574" fillOpacity={0.06} stroke="#0FA574" strokeWidth={2} />
+                    <Line type="monotone" name="BMI" dataKey="bmi" stroke="#3B82F6" strokeWidth={2} />
+                  </>
+                )}
+                {chartTab === 'sleep' && (
+                  <Bar name="Sleep Duration" dataKey="hours" fill="#3B82F6" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                )}
+                {chartTab === 'sugar' && (
+                  <Area name="Glucose (mg/dL)" type="monotone" dataKey="glucose" stroke="#FF7A59" strokeWidth={2} fill="#FF7A59" fillOpacity={0.1} />
+                )}
+                {chartTab === 'bp' && (
+                  <>
+                    <Line type="monotone" name="Systolic BP" dataKey="systolic" stroke="#E5484D" strokeWidth={2} />
+                    <Line type="monotone" name="Diastolic BP" dataKey="diastolic" stroke="#FF9595" strokeWidth={2} />
+                  </>
+                )}
+                {chartTab === 'heartRate' && (
+                  <Area name="Heart Rate (bpm)" type="monotone" dataKey="heartRate" stroke="#3B82F6" strokeWidth={2} fill="#3B82F6" fillOpacity={0.1} />
+                )}
+              </ComposedChart>
+            </ResponsiveContainer>
           )}
         </Card>
 
@@ -351,13 +537,13 @@ export function Dashboard() {
             </span>
             <h3 className="font-semibold text-ink">AI Recommendations</h3>
           </div>
-          {loading || !metrics ? (
+          {initialLoading || !metrics ? (
             <div className="space-y-3">
               {[0, 1, 2].map((i) => <div key={i} className="skeleton h-16 rounded-xl" />)}
             </div>
           ) : (
             <div className="space-y-2.5">
-              {metrics.recommendations.map((r) => (
+              {metrics.recommendations.slice(0, 3).map((r) => (
                 <RecRow key={r.id} rec={r} />
               ))}
             </div>
@@ -377,7 +563,7 @@ export function Dashboard() {
               </span>
               <h3 className="font-semibold text-ink">Recent Alerts</h3>
             </div>
-            {loading ? (
+            {initialLoading ? (
               <div className="space-y-2.5">{[0, 1].map((i) => <div key={i} className="skeleton h-14 rounded-xl" />)}</div>
             ) : data && data.alerts.length > 0 ? (
               <div className="space-y-2.5">
@@ -421,7 +607,7 @@ export function Dashboard() {
               </Link>
             </div>
             <div className="space-y-2.5">
-              {loading ? (
+              {initialLoading ? (
                 <>
                   <div className="h-16 w-full animate-pulse rounded-xl bg-line" />
                   <div className="h-16 w-full animate-pulse rounded-xl bg-line" />
@@ -450,7 +636,7 @@ export function Dashboard() {
                             : 'brand'
                       }
                     >
-                      {report.riskLevel}
+                      {report.riskPercentage}%
                     </Badge>
                   </button>
                 ))
@@ -459,16 +645,16 @@ export function Dashboard() {
           </Card>
         </div>
 
-        {/* Column 2: Medicine Reminders & Tips */}
+        {/* Column 2: Reminders & Tips */}
         <div className="space-y-4">
-          {/* Upcoming Reminders */}
+          {/* Daily Meds Reminders */}
           <Card padding="lg">
             <div className="mb-4 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="grid h-9 w-9 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300">
+                <span className="grid h-9 w-9 place-items-center rounded-xl bg-info/10 text-info">
                   <Pill className="h-5 w-5" />
                 </span>
-                <h3 className="font-semibold text-ink">Medicines Today</h3>
+                <h3 className="font-semibold text-ink">Today's Schedule</h3>
               </div>
               <Link to="/reminders" className="text-xs font-semibold text-brand-600 hover:text-brand-700 transition">
                 Manage
@@ -479,23 +665,21 @@ export function Dashboard() {
                 <div
                   key={r.id}
                   className={cn(
-                    'flex items-center justify-between rounded-xl border p-3 transition',
-                    r.taken ? 'border-brand-200/50 bg-brand-50/15 dark:border-brand-500/20' : 'border-line bg-surface/50 hover:border-brand-300',
+                    'flex items-center justify-between rounded-xl border border-line bg-surface/50 p-3 transition',
+                    r.taken && 'opacity-65 border-transparent bg-surface/20'
                   )}
                 >
                   <div className="min-w-0">
-                    <p className={cn('truncate text-sm font-semibold text-ink', r.taken && 'line-through text-ink-muted')}>{r.name}</p>
-                    <p className="text-xs text-ink-muted">
-                      {r.dosage} · {r.time}
-                    </p>
+                    <p className={cn('text-sm font-semibold text-ink truncate', r.taken && 'line-through')}>{r.name}</p>
+                    <p className="text-xs text-ink-muted">{r.dosage} • {r.time}</p>
                   </div>
                   {r.taken ? (
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300">
-                      <Check className="h-4.5 w-4.5" strokeWidth={3} />
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10 text-success">
+                      <Check className="h-4.5 w-4.5" />
                     </span>
                   ) : (
-                    <Button size="sm" variant="outline" onClick={() => handleTakeReminder(r.id, r.name)}>
-                      Log Taken
+                    <Button size="sm" variant="secondary" onClick={() => handleTakeReminder(r.id, r.name)}>
+                      Log
                     </Button>
                   )}
                 </div>
@@ -503,20 +687,25 @@ export function Dashboard() {
             </div>
           </Card>
 
-          {/* Health Tips */}
+          {/* Quick Health Tips */}
           <Card padding="lg">
-            <h3 className="mb-4 font-semibold text-ink">Today's Health Tips</h3>
+            <div className="mb-4 flex items-center gap-2.5">
+              <span className="grid h-9 w-9 place-items-center rounded-xl bg-gold-400/15 text-gold-500">
+                <Sparkles className="h-5 w-5" />
+              </span>
+              <h3 className="font-semibold text-ink">AI Healthy Tips</h3>
+            </div>
             <div className="space-y-3">
-              {TIPS.map((t) => {
+              {TIPS.map((t, idx) => {
                 const Icon = t.icon
                 return (
-                  <div key={t.title} className="flex gap-3">
-                    <span className={cn('grid h-9 w-9 shrink-0 place-items-center rounded-xl', t.tone)}>
+                  <div key={idx} className="flex gap-3">
+                    <span className={cn('grid h-8.5 w-8.5 shrink-0 place-items-center rounded-lg', t.tone)}>
                       <Icon className="h-4.5 w-4.5" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-ink">{t.title}</p>
-                      <p className="text-xs text-ink-muted">{t.text}</p>
+                      <p className="text-xs font-bold text-ink">{t.title}</p>
+                      <p className="mt-0.5 text-xs leading-relaxed text-ink-muted">{t.text}</p>
                     </div>
                   </div>
                 )
@@ -557,39 +746,130 @@ export function Dashboard() {
               </span>
               <h3 className="font-semibold text-ink">Vitals Goal Tracker</h3>
             </div>
-            <div className="space-y-3.5">
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-ink mb-1.5">
-                  <span>Water Intake</span>
-                  <span className="text-ink-muted">1.5L / 2.0L (75%)</span>
+            
+            {vitalsLoading ? (
+              <div className="space-y-4 py-2">
+                <div className="h-8 w-full animate-pulse rounded bg-line" />
+                <div className="h-8 w-full animate-pulse rounded bg-line" />
+                <div className="h-8 w-full animate-pulse rounded bg-line" />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Water */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-ink">
+                    <span>Water Intake</span>
+                    <span className="text-ink-muted">
+                      {(waterToday / 1000).toFixed(1)}L / {(waterTarget / 1000).toFixed(1)}L ({waterPercent}%)
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-line overflow-hidden">
+                    <div className="h-full bg-info rounded-full transition-all duration-500" style={{ width: `${waterPercent}%` }} />
+                  </div>
+                  <div className="flex gap-2.5">
+                    <button
+                      onClick={() => handleQuickWater(250)}
+                      className="rounded bg-surface border border-line px-2 py-0.5 text-[10px] font-bold text-ink-muted hover:border-brand-300 hover:text-ink transition"
+                    >
+                      +250ml
+                    </button>
+                    <button
+                      onClick={() => handleQuickWater(500)}
+                      className="rounded bg-surface border border-line px-2 py-0.5 text-[10px] font-bold text-ink-muted hover:border-brand-300 hover:text-ink transition"
+                    >
+                      +500ml
+                    </button>
+                  </div>
                 </div>
-                <div className="h-2 w-full rounded-full bg-line overflow-hidden">
-                  <div className="h-full bg-info rounded-full transition-all duration-500" style={{ width: '75%' }} />
+
+                {/* Sleep */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-ink">
+                    <span>Sleep Duration</span>
+                    <span className="text-ink-muted">
+                      {sleepToday}h / {sleepTarget}h ({sleepPercent}%)
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-line overflow-hidden">
+                    <div className="h-full bg-brand-500 rounded-full transition-all duration-500" style={{ width: `${sleepPercent}%` }} />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.5"
+                      min="0"
+                      max="24"
+                      placeholder="Hours"
+                      className="h-6 w-16 rounded border border-line bg-surface px-1 text-[10px] text-ink outline-none"
+                      onChange={(e) => {
+                        const val = parseFloat(e.target.value)
+                        if (val > 0) handleQuickSleep(val)
+                      }}
+                    />
+                    <span className="text-[10px] text-ink-muted italic">Type to log sleep</span>
+                  </div>
+                </div>
+
+                {/* Exercise */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs font-semibold text-ink">
+                    <span>Cardio Workout</span>
+                    <span className="text-ink-muted">
+                      {exerciseToday}m / {exerciseTarget}m ({exercisePercent}%)
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-line overflow-hidden">
+                    <div className="h-full bg-coral-500 rounded-full transition-all duration-500" style={{ width: `${exercisePercent}%` }} />
+                  </div>
+                  <div className="flex gap-2.5">
+                    <button
+                      onClick={() => handleQuickExercise(15)}
+                      className="rounded bg-surface border border-line px-2 py-0.5 text-[10px] font-bold text-ink-muted hover:border-brand-300 hover:text-ink transition"
+                    >
+                      +15m Cardio
+                    </button>
+                    <button
+                      onClick={() => handleQuickExercise(30)}
+                      className="rounded bg-surface border border-line px-2 py-0.5 text-[10px] font-bold text-ink-muted hover:border-brand-300 hover:text-ink transition"
+                    >
+                      +30m Run
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-ink mb-1.5">
-                  <span>Sleep Duration</span>
-                  <span className="text-ink-muted">7.5h / 8.0h (93%)</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-line overflow-hidden">
-                  <div className="h-full bg-brand-500 rounded-full transition-all duration-500" style={{ width: '93%' }} />
-                </div>
-              </div>
-              <div>
-                <div className="flex justify-between text-xs font-semibold text-ink mb-1.5">
-                  <span>Weight Target</span>
-                  <span className="text-ink-muted">74.0kg / Target 70.0kg</span>
-                </div>
-                <div className="h-2 w-full rounded-full bg-line overflow-hidden">
-                  <div className="h-full bg-coral-500 rounded-full transition-all duration-500" style={{ width: '80%' }} />
-                </div>
-              </div>
-            </div>
+            )}
           </Card>
         </div>
       </div>
 
+      {/* Log Vitals Modal */}
+      <Modal
+        open={vitalsModalOpen}
+        onClose={() => setVitalsModalOpen(false)}
+        title="Log Today's Health Vitals"
+        description="Save your metrics to compute your health score and update chronological trends charts."
+        size="lg"
+        footer={
+          <div className="flex gap-3 justify-end">
+            <Button onClick={() => setVitalsModalOpen(false)} variant="secondary">Cancel</Button>
+            <Button onClick={handleLogVitalsSubmit} loading={submittingVitals}>Save Metrics</Button>
+          </div>
+        }
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Input label="Weight (kg)" type="number" step="0.1" value={logWeight} onChange={(e) => setLogWeight(e.target.value)} placeholder="e.g. 74.5" />
+          <Input label="Systolic Blood Pressure" type="number" value={logSystolic} onChange={(e) => setLogSystolic(e.target.value)} placeholder="e.g. 120" />
+          <Input label="Diastolic Blood Pressure" type="number" value={logDiastolic} onChange={(e) => setLogDiastolic(e.target.value)} placeholder="e.g. 80" />
+          <Input label="Blood Sugar (Glucose)" type="number" value={logGlucose} onChange={(e) => setLogGlucose(e.target.value)} placeholder="e.g. 95" />
+          <Input label="Resting Heart Rate (bpm)" type="number" value={logHeartRate} onChange={(e) => setLogHeartRate(e.target.value)} placeholder="e.g. 72" />
+          <Input label="Sleep Hours" type="number" step="0.5" value={logSleep} onChange={(e) => setLogSleep(e.target.value)} placeholder="e.g. 7.5" />
+          <Input label="Exercise Duration (minutes)" type="number" value={logExercise} onChange={(e) => setLogExercise(e.target.value)} placeholder="e.g. 30" />
+          <Input label="Calories Consumed" type="number" value={logCaloriesC} onChange={(e) => setLogCaloriesC(e.target.value)} placeholder="e.g. 2100" />
+          <Input label="Calories Burned" type="number" value={logCaloriesB} onChange={(e) => setLogCaloriesB(e.target.value)} placeholder="e.g. 400" />
+        </div>
+      </Modal>
+
+      {/* Reports Details Modal */}
       <Modal
         open={selectedReport !== null}
         onClose={() => setSelectedReport(null)}
@@ -697,6 +977,7 @@ export function Dashboard() {
     </div>
   )
 }
+
 function RecRow({ rec }: { rec: Recommendation }) {
   const Icon = REC_ICON[rec.icon]
   const tone = PRIORITY_TONE[rec.priority]

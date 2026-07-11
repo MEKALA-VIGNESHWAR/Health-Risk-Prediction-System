@@ -96,3 +96,123 @@ export async function fetchDashboard(userId: string): Promise<DashboardData> {
 }
 
 export { ts as pointTime }
+
+export interface PersonalDashboard {
+  healthScore: number
+  scoreLabel: string
+  streak: number
+  today: {
+    waterIntakeMl: number
+    sleepHours: number
+    caloriesConsumed: number
+    caloriesBurned: number
+    exerciseMinutes: number
+    weightKg?: number
+    systolicBp?: number
+    diastolicBp?: number
+    bloodSugar?: number
+    heartRate?: number
+  }
+}
+
+export interface ChartsData {
+  bmi: Array<{ date: string; weight: number; bmi: number }>
+  sleep: Array<{ date: string; hours: number }>
+  sugar: Array<{ date: string; glucose: number }>
+  bp: Array<{ date: string; systolic: number; diastolic: number }>
+  weight: Array<{ date: string; weight: number }>
+  heartRate: Array<{ date: string; heartRate: number }>
+}
+
+export async function fetchPersonalDashboard(): Promise<PersonalDashboard> {
+  const res = await api.get<any>('/dashboard')
+  return res.data as PersonalDashboard
+}
+
+export async function fetchChartsData(): Promise<ChartsData> {
+  const res = await api.get<any>('/dashboard/charts')
+  return res.data as ChartsData
+}
+
+export async function fetchInsights(): Promise<string[]> {
+  const res = await api.get<any>('/dashboard/insights')
+  return res.data as string[]
+}
+
+export async function logVitals(payload: Record<string, any>): Promise<any> {
+  return api.post('/dashboard/log', payload)
+}
+
+// ── Predictions DTO and Helpers ───────────────────────────────────────────
+
+export interface DiabetesPredictionRequest {
+  pregnancies?: number
+  glucose?: number
+  bloodPressure?: number
+  skinThickness?: number
+  insulin?: number
+  bmi?: number
+  diabetesPedigreeFunction?: number
+  age?: number
+  userId?: string
+}
+
+export interface DiabetesPredictionResponse {
+  predictionResult: number // 0 or 1
+  probabilityNoDiabetes: number
+  probabilityDiabetes: number
+  predictionMessage: string
+  riskLevel: string
+  riskPercentage: number
+  confidenceLevel: number
+  confidenceText: string
+  modelUsed: string
+  modelVersion: string
+  featureImportance?: string // JSON representation
+  timestamp: number
+  predictionId: string
+  abnormalValues?: any
+  recommendations?: any
+  previousComparison?: any
+}
+
+export interface HeartPredictionRequest {
+  age?: number
+  sex?: number
+  cp?: number
+  trestbps?: number
+  chol?: number
+  fbs?: number
+  restecg?: number
+  thalach?: number
+  exang?: number
+  oldpeak?: number
+  slope?: number
+  ca?: number
+  thal?: number
+  userId?: string
+}
+
+export interface HeartPredictionResponse {
+  predictionResult: number // 0 or 1
+  diseaseProbability: number
+  noDiseaseProbability: number
+  predictionMessage: string
+  risk: string
+  confidenceLevel: number
+  modelUsed: string
+  topFactors?: any // List of map
+  recommendations?: any // List of string
+  riskDescription?: string
+  abnormalValues?: any
+  predictionId: string
+}
+
+export async function predictDiabetes(payload: DiabetesPredictionRequest): Promise<DiabetesPredictionResponse> {
+  return await api.post<DiabetesPredictionResponse>('/predict/diabetes', payload)
+}
+
+export async function predictHeart(payload: HeartPredictionRequest): Promise<HeartPredictionResponse> {
+  return await api.post<HeartPredictionResponse>('/predict/heart', payload)
+}
+

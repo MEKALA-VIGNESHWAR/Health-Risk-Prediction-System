@@ -8,7 +8,6 @@ import { Register } from '@/pages/Register'
 import { ForgotPassword } from '@/pages/ForgotPassword'
 import { ResetPassword } from '@/pages/ResetPassword'
 import { VerifyEmail } from '@/pages/VerifyEmail'
-import { ComingSoon } from '@/pages/ComingSoon'
 import { NotFound } from '@/pages/NotFound'
 
 // Code-split the heavier feature pages.
@@ -19,9 +18,12 @@ const SymptomChecker = lazy(() =>
 const Profile = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
 const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const History = lazy(() => import('@/pages/History').then((m) => ({ default: m.History })))
+const Analytics = lazy(() => import('@/pages/Analytics').then((m) => ({ default: m.Analytics })))
 const Nutrition = lazy(() => import('@/pages/Nutrition').then((m) => ({ default: m.Nutrition })))
 const Fitness = lazy(() => import('@/pages/Fitness').then((m) => ({ default: m.Fitness })))
 const Reminders = lazy(() => import('@/pages/Reminders').then((m) => ({ default: m.Reminders })))
+const Reports = lazy(() => import('@/pages/Reports').then((m) => ({ default: m.Reports })))
+const Predictions = lazy(() => import('@/pages/Predictions').then((m) => ({ default: m.Predictions })))
 const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
 const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
 
@@ -49,8 +51,9 @@ export default function App() {
           <Route path="/symptoms" element={<Lazy><SymptomChecker /></Lazy>} />
           <Route path="/profile" element={<Lazy><Profile /></Lazy>} />
           <Route path="/history" element={<Lazy><History /></Lazy>} />
-          <Route path="/analytics" element={<ComingSoon />} />
-          <Route path="/reports" element={<ComingSoon />} />
+          <Route path="/analytics" element={<Lazy><Analytics /></Lazy>} />
+          <Route path="/reports" element={<Lazy><Reports /></Lazy>} />
+          <Route path="/predictions" element={<Lazy><Predictions /></Lazy>} />
           <Route path="/nutrition" element={<Lazy><Nutrition /></Lazy>} />
           <Route path="/fitness" element={<Lazy><Fitness /></Lazy>} />
           <Route path="/reminders" element={<Lazy><Reminders /></Lazy>} />
