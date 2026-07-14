@@ -28,7 +28,7 @@ export function AppShell() {
   useEffect(() => setMobileOpen(false), [location.pathname])
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex h-screen w-screen overflow-hidden">
       <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
 
       {/* Mobile drawer */}
@@ -62,9 +62,9 @@ export function AppShell() {
         )}
       </AnimatePresence>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
         <Topbar onOpenMenu={() => setMobileOpen(true)} />
-        <main className="flex-1">
+        <main className="flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
