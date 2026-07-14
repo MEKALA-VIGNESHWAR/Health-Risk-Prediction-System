@@ -88,11 +88,6 @@ export function Login() {
           Create an account
         </Link>
       </p>
-
-      <div className="mt-8 rounded-xl border border-line bg-surface/60 p-3 text-center text-xs text-ink-subtle">
-        Demo patient: <span className="font-mono font-semibold text-ink-muted">testuser</span> /{' '}
-        <span className="font-mono font-semibold text-ink-muted">Test@123</span>
-      </div>
     </AuthLayout>
   )
 }
