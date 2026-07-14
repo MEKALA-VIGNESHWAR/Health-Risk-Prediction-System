@@ -103,9 +103,7 @@ public class SymptomController {
 
     private User currentUser(Authentication auth) {
         if (auth == null || auth.getName() == null) {
-            List<User> list = userRepository.findAll();
-            if (list.isEmpty()) throw new RuntimeException("No users registered in database");
-            return list.get(0);
+            throw new RuntimeException("User not authenticated");
         }
         return userRepository.findByUsername(auth.getName())
                 .orElseThrow(() -> new RuntimeException("User not found"));

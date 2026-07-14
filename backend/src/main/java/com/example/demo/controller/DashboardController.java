@@ -354,8 +354,7 @@ public class DashboardController {
 
     private Optional<User> currentUser(Authentication auth) {
         if (auth == null || auth.getName() == null) {
-            List<User> users = userRepository.findAll();
-            return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+            return Optional.empty();
         }
         return userRepository.findByUsername(auth.getName());
     }

@@ -439,22 +439,7 @@ public class DashboardService {
                 }
             }
 
-            if (history.isEmpty()) {
-                LocalDate start = LocalDate.now().minusDays(6);
-                for (int i = 0; i < 7; i++) {
-                    LocalDate d = start.plusDays(i);
-                    String dStr = d.toString();
-                    double mockWeight = 74.0 + (Math.sin(i) * 0.4);
-                    double mockBmi = mockWeight / (heightM * heightM);
-                    
-                    bmiData.add(Map.of("date", dStr, "weight", Math.round(mockWeight * 10.0) / 10.0, "bmi", Math.round(mockBmi * 10.0) / 10.0));
-                    sleepData.add(Map.of("date", dStr, "hours", 7.0 + (i % 3 == 0 ? 0.8 : -0.5)));
-                    sugarData.add(Map.of("date", dStr, "glucose", 90 + (i * 3) % 20));
-                    bpData.add(Map.of("date", dStr, "systolic", 118 + i % 4, "diastolic", 78 + i % 3));
-                    weightData.add(Map.of("date", dStr, "weight", Math.round(mockWeight * 10.0) / 10.0));
-                    hrData.add(Map.of("date", dStr, "heartRate", 68 + (i * 4) % 10));
-                }
-            }
+
 
             return Map.of(
                 "bmi", bmiData,
