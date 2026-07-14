@@ -221,11 +221,24 @@ export function Predictions() {
     }
   }
 
+  // Support both camelCase and snake_case responses from the backend
+  const heartDiseaseProb = heartResult?.diseaseProbability ?? (heartResult as any)?.disease_probability ?? 0
+  const heartNoDiseaseProb = heartResult?.noDiseaseProbability ?? (heartResult as any)?.no_disease_probability ?? 0
+  const heartTopFactors = heartResult?.topFactors ?? (heartResult as any)?.top_factors ?? []
+  const heartRiskDescription = heartResult?.riskDescription ?? (heartResult as any)?.risk_description ?? ''
+  const heartAbnormalValues = heartResult?.abnormalValues ?? (heartResult as any)?.abnormal_values ?? {}
+
+  const diabetesDiseaseProb = diabetesResult?.probabilityDiabetes ?? 0
+  const diabetesNoDiseaseProb = diabetesResult?.probabilityNoDiabetes ?? 0
+  const diabetesAbnormalValues = diabetesResult?.abnormalValues ?? {}
+
   // Parse feature importances for Recharts SHAP display
   const parsedFeatureImportance = useMemo(() => {
     if (activeTab === 'diabetes' && diabetesResult?.featureImportance) {
       try {
-        const parsed = JSON.parse(diabetesResult.featureImportance)
+        const parsed = typeof diabetesResult.featureImportance === 'string'
+          ? JSON.parse(diabetesResult.featureImportance)
+          : diabetesResult.featureImportance
         return Object.entries(parsed).map(([name, val]) => ({
           name: name.replace('DiabetesPedigreeFunction', 'Pedigree').replace('BloodPressure', 'BP'),
           value: Math.round((Number(val) || 0) * 100),
@@ -235,16 +248,16 @@ export function Predictions() {
       }
     }
     
-    if (activeTab === 'heart' && heartResult?.topFactors) {
-      const list = heartResult.topFactors as Array<{ factor: string; importance: number }>
+    if (activeTab === 'heart' && heartTopFactors) {
+      const list = heartTopFactors as Array<{ factor: string; importance: number }>
       return list.map((item) => ({
-        name: item.factor,
-        value: Math.round(item.importance * 100),
+        name: item.factor.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase()),
+        value: Math.round((Number(item.importance) || 0) * 100),
       })).sort((a, b) => b.value - a.value)
     }
 
     return []
-  }, [activeTab, diabetesResult, heartResult])
+  }, [activeTab, diabetesResult, heartResult, heartTopFactors])
 
   // Parse recommendations safely
   const parsedRecommendations = useMemo(() => {
@@ -269,14 +282,26 @@ export function Predictions() {
     return []
   }, [activeTab, diabetesResult, heartResult])
 
-  // Score metrics
+  // Unified Risk Metrics
   const riskScore = activeTab === 'diabetes'
     ? Math.round(diabetesResult?.riskPercentage ?? 0)
-    : Math.round((heartResult?.diseaseProbability ?? 0) * 100)
+    : Math.round(heartDiseaseProb * 100)
 
   const riskLevel = activeTab === 'diabetes'
     ? diabetesResult?.riskLevel ?? 'LOW'
     : heartResult?.risk ?? 'LOW'
+
+  const riskPrediction = activeTab === 'diabetes'
+    ? diabetesResult?.prediction ?? 0
+    : heartResult?.prediction ?? 0
+
+  const probDisease = activeTab === 'diabetes'
+    ? diabetesDiseaseProb
+    : heartDiseaseProb
+
+  const probNoDisease = activeTab === 'diabetes'
+    ? diabetesNoDiseaseProb
+    : heartNoDiseaseProb
 
   const scoreColor = (score: number) => {
     if (score <= 30) return 'text-brand-600 stroke-brand-500'
@@ -707,6 +732,24 @@ export function Predictions() {
                 exit={{ opacity: 0 }}
                 className="space-y-6"
               >
+                {/* Diagnostic Verdict Banner */}
+                <div className={cn(
+                  "w-full rounded-2xl p-5 text-center border shadow-soft",
+                  riskPrediction === 1 
+                    ? "bg-danger-50/10 border-danger-200/50 text-danger-800 dark:text-danger-400"
+                    : "bg-brand-50/10 border-brand-200/50 text-brand-800 dark:text-brand-400"
+                )}>
+                  <span className="text-[10px] uppercase font-bold tracking-wider block mb-1 opacity-75">Diagnostic Verdict</span>
+                  <span className="text-base font-extrabold block">
+                    {riskPrediction === 1 ? "⚠️ Clinical Risk: POSITIVE" : "✅ Clinical Risk: NEGATIVE"}
+                  </span>
+                  <p className="text-xs mt-2 leading-relaxed opacity-95">
+                    {riskPrediction === 1 
+                      ? "The model detected indicators matching patterns in the clinical training dataset. We recommend showing these results to your doctor."
+                      : "The model found that your metrics are consistent with low-risk patients in the clinical training dataset. Keep up the healthy habits!"}
+                  </p>
+                </div>
+
                 {/* Risk score gauge */}
                 <Card className="border border-line bg-card shadow-soft p-5 text-center flex flex-col items-center justify-center">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-ink-subtle">Calculated Risk</h3>
@@ -747,11 +790,35 @@ export function Predictions() {
                     </span>
                   </div>
 
-                  {activeTab === 'heart' && heartResult?.riskDescription && (
+                  {activeTab === 'heart' && heartRiskDescription && (
                     <p className="mt-3.5 text-xs text-ink-muted leading-relaxed italic">
-                      "{heartResult.riskDescription}"
+                      "{heartRiskDescription}"
                     </p>
                   )}
+
+                  {/* Dynamic Probability Meter */}
+                  <div className="w-full mt-5 pt-4 border-t border-line space-y-2">
+                    <div className="flex justify-between text-[11px] font-bold text-ink-muted">
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-2 w-2 rounded-full bg-brand-500" />
+                        Healthy Probability: {Math.round(probNoDisease * 100)}%
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <span className={cn("h-2 w-2 rounded-full", riskPrediction === 1 ? "bg-danger" : "bg-warning")} />
+                        Disease Probability: {Math.round(probDisease * 100)}%
+                      </span>
+                    </div>
+                    <div className="h-3 w-full rounded-full bg-line overflow-hidden flex">
+                      <div 
+                        className="bg-brand-500 transition-all duration-500" 
+                        style={{ width: `${probNoDisease * 100}%` }}
+                      />
+                      <div 
+                        className={cn("transition-all duration-500", riskPrediction === 1 ? "bg-danger" : "bg-warning")}
+                        style={{ width: `${probDisease * 100}%` }}
+                      />
+                    </div>
+                  </div>
                 </Card>
 
                 {/* SHAP Feature Contribution Chart */}
@@ -789,14 +856,13 @@ export function Predictions() {
                 )}
 
                 {/* Vitals Anomalies Alerts */}
-                {((activeTab === 'diabetes' ? diabetesResult?.abnormalValues : heartResult?.abnormalValues)) && 
-                  Object.keys(activeTab === 'diabetes' ? diabetesResult?.abnormalValues : heartResult?.abnormalValues).length > 0 && (
+                {Object.keys(activeTab === 'diabetes' ? diabetesAbnormalValues : heartAbnormalValues).length > 0 && (
                   <Card className="border border-line bg-card shadow-soft p-4 space-y-2">
                     <h3 className="text-xs font-bold uppercase tracking-wider text-ink-subtle">
                       Vitals Exceeding Safety Limits
                     </h3>
                     <div className="space-y-2">
-                      {Object.entries(activeTab === 'diabetes' ? diabetesResult?.abnormalValues : heartResult?.abnormalValues).map(([key, val]: any) => (
+                      {Object.entries(activeTab === 'diabetes' ? diabetesAbnormalValues : heartAbnormalValues).map(([key, val]: any) => (
                         <div
                           key={key}
                           className="flex items-center justify-between rounded-xl border border-danger-200/20 bg-danger/5 px-3 py-2 text-xs"

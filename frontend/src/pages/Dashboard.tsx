@@ -364,7 +364,7 @@ export function Dashboard() {
               </p>
               <div className="mt-5 flex flex-wrap justify-center gap-3 lg:justify-start">
                 <Link to="/assistant">
-                  <Button variant="coral" leftIcon={<Sparkles className="h-4 w-4" />}>Ask AuraHealth</Button>
+                  <Button variant="coral" leftIcon={<Sparkles className="h-4 w-4" />}>Ask PulseMind</Button>
                 </Link>
                 <Button
                   onClick={() => setVitalsModalOpen(true)}

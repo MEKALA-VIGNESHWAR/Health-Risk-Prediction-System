@@ -63,7 +63,7 @@ export function Register() {
         password: form.password,
         confirmPassword: form.confirmPassword,
       })
-      toast.success('Account created — welcome to AuraHealth!')
+      toast.success('Account created — welcome to PulseMind!')
       navigate('/', { replace: true })
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Could not create your account.'

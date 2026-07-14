@@ -24,6 +24,87 @@ public class HeartPredictionService {
 
     private final HeartPredictionRepositoryJPA predictionRepository;
 
+    private List<HeartRecord> dataset = new ArrayList<>();
+    private double[] minValues = new double[10];
+    private double[] maxValues = new double[10];
+    private boolean isModelLoaded = false;
+
+    private static class HeartRecord {
+        double[] features;
+        int target;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        loadDataset();
+    }
+
+    private void loadDataset() {
+        log.info("Loading heart dataset from CSV for KNN prediction model...");
+        String csvPath = "../data/heart_clean.csv";
+        java.io.File file = new java.io.File(csvPath);
+        if (!file.exists()) {
+            csvPath = "data/heart_clean.csv";
+            file = new java.io.File(csvPath);
+        }
+
+        if (!file.exists()) {
+            log.warn("⚠ Heart CSV file not found at '../data/heart_clean.csv' or 'data/heart_clean.csv'. Falling back to heuristic rules.");
+            return;
+        }
+
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+            String header = br.readLine(); // Skip header
+            String line;
+            List<double[]> rawFeaturesList = new ArrayList<>();
+            List<Integer> targets = new ArrayList<>();
+
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                if (parts.length < 11) continue;
+
+                double[] f = new double[10];
+                for (int i = 0; i < 10; i++) {
+                    f[i] = Double.parseDouble(parts[i].trim());
+                }
+                int target = Integer.parseInt(parts[10].trim());
+
+                rawFeaturesList.add(f);
+                targets.add(target);
+            }
+
+            if (rawFeaturesList.isEmpty()) {
+                log.warn("⚠ Loaded heart dataset is empty. Falling back to heuristic rules.");
+                return;
+            }
+
+            // Compute Min and Max for scaling
+            Arrays.fill(minValues, Double.MAX_VALUE);
+            Arrays.fill(maxValues, Double.MIN_VALUE);
+
+            for (double[] f : rawFeaturesList) {
+                for (int i = 0; i < 10; i++) {
+                    if (f[i] < minValues[i]) minValues[i] = f[i];
+                    if (f[i] > maxValues[i]) maxValues[i] = f[i];
+                }
+            }
+
+            for (int i = 0; i < rawFeaturesList.size(); i++) {
+                HeartRecord record = new HeartRecord();
+                record.features = rawFeaturesList.get(i);
+                record.target = targets.get(i);
+                dataset.add(record);
+            }
+
+            isModelLoaded = true;
+            log.info("✓ Heart dataset loaded successfully. Total records: {}.", dataset.size());
+
+        } catch (Exception e) {
+            log.error("Failed to load heart dataset: {}", e.getMessage(), e);
+        }
+    }
+
     /**
      * Make heart disease prediction using ML model logic
      * This is a simplified implementation - in production, you would call Python ML model
@@ -105,6 +186,93 @@ public class HeartPredictionService {
      * Features (13): age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, thal
      */
     private double[] calculateProbabilitiesAdvanced(HeartPredictionRequest request) {
+        if (!isModelLoaded || dataset.isEmpty()) {
+            log.warn("Heart KNN model is not loaded. Falling back to heuristic model.");
+            return calculateProbabilitiesFallback(request);
+        }
+
+        // Extract query features (10 features)
+        double[] query = new double[10];
+        query[0] = request.getAge() != null ? request.getAge() : 45.0;
+        query[1] = request.getSex() != null ? request.getSex() : 1.0;
+        query[2] = request.getCp() != null ? request.getCp() : 1.0;
+        query[3] = request.getTrestbps() != null ? request.getTrestbps() : 120.0;
+        query[4] = request.getChol() != null ? request.getChol() : 200.0;
+        query[5] = request.getFbs() != null ? request.getFbs() : 0.0;
+        query[6] = request.getRestecg() != null ? request.getRestecg() : 1.0;
+        query[7] = request.getThalach() != null ? request.getThalach() : 150.0;
+        query[8] = request.getExang() != null ? request.getExang() : 0.0;
+        query[9] = request.getOldpeak() != null ? request.getOldpeak() : 0.0;
+
+        // Normalize query
+        double[] normalizedQuery = new double[10];
+        for (int i = 0; i < 10; i++) {
+            double range = maxValues[i] - minValues[i];
+            normalizedQuery[i] = range > 0 ? (query[i] - minValues[i]) / range : 0.0;
+            normalizedQuery[i] = Math.min(1.0, Math.max(0.0, normalizedQuery[i]));
+        }
+
+        // Calculate distances
+        class Neighbor implements Comparable<Neighbor> {
+            double distance;
+            int target;
+
+            Neighbor(double distance, int target) {
+                this.distance = distance;
+                this.target = target;
+            }
+
+            @Override
+            public int compareTo(Neighbor o) {
+                return Double.compare(this.distance, o.distance);
+            }
+        }
+
+        List<Neighbor> neighbors = new ArrayList<>();
+        for (HeartRecord record : dataset) {
+            double dist = 0.0;
+            for (int i = 0; i < 10; i++) {
+                double range = maxValues[i] - minValues[i];
+                double valNorm = range > 0 ? (record.features[i] - minValues[i]) / range : 0.0;
+                double diff = normalizedQuery[i] - valNorm;
+
+                // Feature weights based on Random Forest importance
+                double weight = 1.0;
+                if (i == 2) weight = 2.2; // Chest Pain (cp)
+                else if (i == 7) weight = 2.0; // Max Heart Rate (thalach)
+                else if (i == 9) weight = 2.0; // ST depression (oldpeak)
+                else if (i == 4) weight = 1.5; // Cholesterol (chol)
+                else if (i == 0) weight = 1.5; // Age
+                else if (i == 3) weight = 1.2; // Blood Pressure (trestbps)
+                else if (i == 8) weight = 1.2; // Exercise induced angina (exang)
+
+                dist += weight * diff * diff;
+            }
+            neighbors.add(new Neighbor(Math.sqrt(dist), record.target));
+        }
+
+        Collections.sort(neighbors);
+
+        // Pick K neighbors
+        int k = 15;
+        int positiveCount = 0;
+        for (int i = 0; i < Math.min(k, neighbors.size()); i++) {
+            if (neighbors.get(i).target == 1) {
+                positiveCount++;
+            }
+        }
+
+        double diseaseProb = (double) positiveCount / Math.min(k, neighbors.size());
+        diseaseProb = Math.min(0.99, Math.max(0.01, diseaseProb));
+
+        double[] probabilities = new double[2];
+        probabilities[1] = diseaseProb;
+        probabilities[0] = 1.0 - diseaseProb;
+
+        return probabilities;
+    }
+
+    private double[] calculateProbabilitiesFallback(HeartPredictionRequest request) {
         double[] probabilities = new double[2];
         
         // 1. Feature Normalization

@@ -159,6 +159,7 @@ export interface DiabetesPredictionRequest {
 
 export interface DiabetesPredictionResponse {
   predictionResult: number // 0 or 1
+  prediction?: number
   probabilityNoDiabetes: number
   probabilityDiabetes: number
   predictionMessage: string
@@ -195,6 +196,7 @@ export interface HeartPredictionRequest {
 
 export interface HeartPredictionResponse {
   predictionResult: number // 0 or 1
+  prediction?: number
   diseaseProbability: number
   noDiseaseProbability: number
   predictionMessage: string

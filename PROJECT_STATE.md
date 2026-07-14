@@ -1,6 +1,6 @@
-# Project State: AI Health Risk Prediction System 2.0 (AuraHealth)
+# Project State: AI Health Risk Prediction System 2.0 (PulseMind)
 
-This document maps the development state of **AuraHealth**, transitioning from a simple prediction application to a premium, production-ready AI Healthcare Platform.
+This document maps the development state of **PulseMind**, transitioning from a simple prediction application to a premium, production-ready AI Healthcare Platform.
 
 ## 📊 Status Summary
 - **Current Phase**: Version 2.0 Upgrade (Design & Platform Expansion)

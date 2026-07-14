@@ -478,7 +478,7 @@ export function SymptomChecker() {
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-ink">Complete steps to analyze</h3>
                   <p className="mt-1.5 max-w-sm text-sm text-ink-muted">
-                    Fill out the symptom checking wizard. AuraHealth will analyze severity, suggest possibilities, and note warnings.
+                    Fill out the symptom checking wizard. PulseMind will analyze severity, suggest possibilities, and note warnings.
                   </p>
                 </Card>
               ) : (

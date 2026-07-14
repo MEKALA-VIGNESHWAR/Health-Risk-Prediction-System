@@ -10,22 +10,44 @@ import { ResetPassword } from '@/pages/ResetPassword'
 import { VerifyEmail } from '@/pages/VerifyEmail'
 import { NotFound } from '@/pages/NotFound'
 
-// Code-split the heavier feature pages.
-const Assistant = lazy(() => import('@/pages/Assistant').then((m) => ({ default: m.Assistant })))
-const SymptomChecker = lazy(() =>
+// Code-split with retry on chunk loading failure (forces refresh to fetch new chunks after deployment)
+function lazyWithRetry<T extends React.ComponentType<any>>(
+  componentImport: () => Promise<{ default: T } | T>
+): React.LazyExoticComponent<T> {
+  return lazy(async () => {
+    const pageHasAlreadyForceReloaded = JSON.parse(
+      window.sessionStorage.getItem('page-has-been-force-reloaded') || 'false'
+    )
+
+    try {
+      const result = await componentImport()
+      window.sessionStorage.setItem('page-has-been-force-reloaded', 'false')
+      return 'default' in result ? result : { default: result } as any
+    } catch (error) {
+      if (!pageHasAlreadyForceReloaded) {
+        window.sessionStorage.setItem('page-has-been-force-reloaded', 'true')
+        window.location.reload()
+      }
+      throw error
+    }
+  })
+}
+
+const Assistant = lazyWithRetry(() => import('@/pages/Assistant').then((m) => ({ default: m.Assistant })))
+const SymptomChecker = lazyWithRetry(() =>
   import('@/pages/SymptomChecker').then((m) => ({ default: m.SymptomChecker })),
 )
-const Profile = lazy(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
-const Dashboard = lazy(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
-const History = lazy(() => import('@/pages/History').then((m) => ({ default: m.History })))
-const Analytics = lazy(() => import('@/pages/Analytics').then((m) => ({ default: m.Analytics })))
-const Nutrition = lazy(() => import('@/pages/Nutrition').then((m) => ({ default: m.Nutrition })))
-const Fitness = lazy(() => import('@/pages/Fitness').then((m) => ({ default: m.Fitness })))
-const Reminders = lazy(() => import('@/pages/Reminders').then((m) => ({ default: m.Reminders })))
-const Reports = lazy(() => import('@/pages/Reports').then((m) => ({ default: m.Reports })))
-const Predictions = lazy(() => import('@/pages/Predictions').then((m) => ({ default: m.Predictions })))
-const Settings = lazy(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
-const Admin = lazy(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
+const Profile = lazyWithRetry(() => import('@/pages/Profile').then((m) => ({ default: m.Profile })))
+const Dashboard = lazyWithRetry(() => import('@/pages/Dashboard').then((m) => ({ default: m.Dashboard })))
+const History = lazyWithRetry(() => import('@/pages/History').then((m) => ({ default: m.History })))
+const Analytics = lazyWithRetry(() => import('@/pages/Analytics').then((m) => ({ default: m.Analytics })))
+const Nutrition = lazyWithRetry(() => import('@/pages/Nutrition').then((m) => ({ default: m.Nutrition })))
+const Fitness = lazyWithRetry(() => import('@/pages/Fitness').then((m) => ({ default: m.Fitness })))
+const Reminders = lazyWithRetry(() => import('@/pages/Reminders').then((m) => ({ default: m.Reminders })))
+const Reports = lazyWithRetry(() => import('@/pages/Reports').then((m) => ({ default: m.Reports })))
+const Predictions = lazyWithRetry(() => import('@/pages/Predictions').then((m) => ({ default: m.Predictions })))
+const Settings = lazyWithRetry(() => import('@/pages/Settings').then((m) => ({ default: m.Settings })))
+const Admin = lazyWithRetry(() => import('@/pages/Admin').then((m) => ({ default: m.Admin })))
 
 function Lazy({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<LoadingState label="Preparing…" />}>{children}</Suspense>

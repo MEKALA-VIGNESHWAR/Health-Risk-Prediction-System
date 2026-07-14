@@ -37,7 +37,7 @@ export function AuthLayout({
               Your intelligent partner in everyday health.
             </motion.h2>
             <p className="mt-4 max-w-md text-brand-50/90">
-              AuraHealth turns complex health signals into clear, personalized guidance — powered by AI.
+              PulseMind turns complex health signals into clear, personalized guidance — powered by AI.
             </p>
 
             <div className="mt-10 space-y-4">
@@ -65,7 +65,7 @@ export function AuthLayout({
           </div>
 
           <p className="text-sm text-brand-50/70">
-            Not a medical device. AuraHealth provides guidance, not diagnosis.
+            Not a medical device. PulseMind provides guidance, not diagnosis.
           </p>
         </div>
       </div>

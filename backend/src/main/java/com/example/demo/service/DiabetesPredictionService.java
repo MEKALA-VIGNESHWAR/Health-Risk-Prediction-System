@@ -35,6 +35,109 @@ public class DiabetesPredictionService {
     private final AlertRepositoryJPA alertRepository;
     private final UserRepositoryJPA userRepository;
 
+    private List<DiabetesRecord> dataset = new ArrayList<>();
+    private double[] minValues = new double[8];
+    private double[] maxValues = new double[8];
+    private boolean isModelLoaded = false;
+
+    private static class DiabetesRecord {
+        double[] features;
+        int outcome;
+    }
+
+    @jakarta.annotation.PostConstruct
+    public void init() {
+        loadDataset();
+    }
+
+    private void loadDataset() {
+        log.info("Loading diabetes dataset from CSV for KNN prediction model...");
+        String csvPath = "../data/diabetes.csv";
+        java.io.File file = new java.io.File(csvPath);
+        if (!file.exists()) {
+            csvPath = "data/diabetes.csv";
+            file = new java.io.File(csvPath);
+        }
+
+        if (!file.exists()) {
+            log.warn("⚠ Diabetes CSV file not found at '../data/diabetes.csv' or 'data/diabetes.csv'. Falling back to heuristic rules.");
+            return;
+        }
+
+        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader(file))) {
+            String header = br.readLine(); // Skip header
+            String line;
+            List<double[]> rawFeaturesList = new ArrayList<>();
+            List<Integer> outcomes = new ArrayList<>();
+
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty()) continue;
+                String[] parts = line.split(",");
+                if (parts.length < 9) continue;
+
+                double[] f = new double[8];
+                for (int i = 0; i < 8; i++) {
+                    f[i] = Double.parseDouble(parts[i].trim());
+                }
+                int outcome = Integer.parseInt(parts[8].trim());
+
+                rawFeaturesList.add(f);
+                outcomes.add(outcome);
+            }
+
+            if (rawFeaturesList.isEmpty()) {
+                log.warn("⚠ Loaded diabetes dataset is empty. Falling back to heuristic rules.");
+                return;
+            }
+
+            // Impute Invalid Zeros for columns: Glucose(1), BloodPressure(2), SkinThickness(3), Insulin(4), BMI(5)
+            int[] invalidZeroCols = {1, 2, 3, 4, 5};
+            double[] medians = new double[8];
+            for (int col : invalidZeroCols) {
+                List<Double> validVals = new ArrayList<>();
+                for (double[] f : rawFeaturesList) {
+                    if (f[col] > 0) validVals.add(f[col]);
+                }
+                if (!validVals.isEmpty()) {
+                    Collections.sort(validVals);
+                    medians[col] = validVals.get(validVals.size() / 2);
+                }
+            }
+
+            for (double[] f : rawFeaturesList) {
+                for (int col : invalidZeroCols) {
+                    if (f[col] <= 0) {
+                        f[col] = medians[col];
+                    }
+                }
+            }
+
+            // Compute Min and Max
+            Arrays.fill(minValues, Double.MAX_VALUE);
+            Arrays.fill(maxValues, Double.MIN_VALUE);
+
+            for (double[] f : rawFeaturesList) {
+                for (int i = 0; i < 8; i++) {
+                    if (f[i] < minValues[i]) minValues[i] = f[i];
+                    if (f[i] > maxValues[i]) maxValues[i] = f[i];
+                }
+            }
+
+            for (int i = 0; i < rawFeaturesList.size(); i++) {
+                DiabetesRecord record = new DiabetesRecord();
+                record.features = rawFeaturesList.get(i);
+                record.outcome = outcomes.get(i);
+                dataset.add(record);
+            }
+
+            isModelLoaded = true;
+            log.info("✓ Diabetes dataset loaded successfully. Total records: {}.", dataset.size());
+
+        } catch (Exception e) {
+            log.error("Failed to load diabetes dataset: {}", e.getMessage(), e);
+        }
+    }
+
     // ===== ALERT THRESHOLDS =====
     private static final double RISK_THRESHOLD_HIGH = 70.0;
     private static final int GLUCOSE_THRESHOLD_HIGH = 180;
@@ -417,6 +520,97 @@ public class DiabetesPredictionService {
      * Mimicking a stacking ensemble of Random Forest, Gradient Boosting, and Logistic Regression.
      */
     private double[] calculateProbabilitiesAdvanced(DiabetesPredictionRequest request) {
+        if (!isModelLoaded || dataset.isEmpty()) {
+            log.warn("KNN model is not loaded. Falling back to heuristic model.");
+            return calculateProbabilitiesFallback(request);
+        }
+
+        // Extract query features
+        double[] query = new double[8];
+        query[0] = request.getPregnancies() != null ? request.getPregnancies() : 0.0;
+        query[1] = request.getGlucose() != null ? request.getGlucose() : 100.0;
+        query[2] = request.getBloodPressure() != null ? request.getBloodPressure() : 70.0;
+        query[3] = request.getSkinThickness() != null ? request.getSkinThickness() : 20.0;
+        query[4] = request.getInsulin() != null ? request.getInsulin() : 80.0;
+        query[5] = request.getBmi() != null ? request.getBmi() : 25.0;
+        query[6] = request.getDiabetesPedigreeFunction() != null ? request.getDiabetesPedigreeFunction() : 0.47;
+        query[7] = request.getAge() != null ? request.getAge() : 30.0;
+
+        // Impute invalid zeros in query
+        int[] invalidZeroCols = {1, 2, 3, 4, 5};
+        double[] defaultValues = {0.0, 100.0, 70.0, 20.0, 80.0, 25.0, 0.47, 30.0};
+        for (int col : invalidZeroCols) {
+            if (query[col] <= 0) {
+                query[col] = defaultValues[col];
+            }
+        }
+
+        // Normalize query
+        double[] normalizedQuery = new double[8];
+        for (int i = 0; i < 8; i++) {
+            double range = maxValues[i] - minValues[i];
+            normalizedQuery[i] = range > 0 ? (query[i] - minValues[i]) / range : 0.0;
+            normalizedQuery[i] = Math.min(1.0, Math.max(0.0, normalizedQuery[i]));
+        }
+
+        // Calculate distances
+        class Neighbor implements Comparable<Neighbor> {
+            double distance;
+            int outcome;
+
+            Neighbor(double distance, int outcome) {
+                this.distance = distance;
+                this.outcome = outcome;
+            }
+
+            @Override
+            public int compareTo(Neighbor o) {
+                return Double.compare(this.distance, o.distance);
+            }
+        }
+
+        List<Neighbor> neighbors = new ArrayList<>();
+        for (DiabetesRecord record : dataset) {
+            double dist = 0.0;
+            for (int i = 0; i < 8; i++) {
+                double range = maxValues[i] - minValues[i];
+                double valNorm = range > 0 ? (record.features[i] - minValues[i]) / range : 0.0;
+                double diff = normalizedQuery[i] - valNorm;
+                
+                // Feature weights based on Pima Random Forest feature importance
+                double weight = 1.0;
+                if (i == 1) weight = 2.5; // Glucose
+                else if (i == 5) weight = 2.0; // BMI
+                else if (i == 7) weight = 1.5; // Age
+                else if (i == 6) weight = 1.5; // Pedigree
+
+                dist += weight * diff * diff;
+            }
+            neighbors.add(new Neighbor(Math.sqrt(dist), record.outcome));
+        }
+
+        Collections.sort(neighbors);
+
+        // Pick K neighbors
+        int k = 15;
+        int positiveCount = 0;
+        for (int i = 0; i < Math.min(k, neighbors.size()); i++) {
+            if (neighbors.get(i).outcome == 1) {
+                positiveCount++;
+            }
+        }
+
+        double diabetesProb = (double) positiveCount / Math.min(k, neighbors.size());
+        diabetesProb = Math.min(0.995, Math.max(0.005, diabetesProb));
+
+        double[] probabilities = new double[2];
+        probabilities[1] = diabetesProb;
+        probabilities[0] = 1.0 - diabetesProb;
+
+        return probabilities;
+    }
+
+    private double[] calculateProbabilitiesFallback(DiabetesPredictionRequest request) {
         double[] probabilities = new double[2];
 
         // 1. Feature Normalization (0.0 to 1.0)

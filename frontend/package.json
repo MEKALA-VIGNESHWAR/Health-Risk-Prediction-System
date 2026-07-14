@@ -1,9 +1,9 @@
 {
-  "name": "aurahealth-frontend",
+  "name": "pulsemind-frontend",
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "AuraHealth — AI-powered health risk prediction platform (React + Vite)",
+  "description": "PulseMind — AI-powered health risk prediction platform (React + Vite)",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

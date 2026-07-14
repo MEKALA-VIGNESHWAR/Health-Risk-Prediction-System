@@ -9,7 +9,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
-const STORAGE_KEY = 'aura-theme'
+const STORAGE_KEY = 'pulse-theme'
 
 function getInitialTheme(): Theme {
   try {

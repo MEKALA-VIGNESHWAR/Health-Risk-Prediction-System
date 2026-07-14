@@ -136,7 +136,7 @@ public class OpenAiClient {
         return "{\n" +
                 "  \"patientName\": \"Demo Patient\",\n" +
                 "  \"reportDate\": \"2026-07-09\",\n" +
-                "  \"labName\": \"AuraHealth Demo Lab\",\n" +
+                "  \"labName\": \"PulseMind Demo Lab\",\n" +
                 "  \"summary\": \"The uploaded report shows normal metabolic parameters with a slightly elevated fasting blood glucose level.\",\n" +
                 "  \"parameters\": [\n" +
                 "    { \"name\": \"Fasting Glucose\", \"value\": \"105 mg/dL\", \"normalRange\": \"70-100 mg/dL\", \"status\": \"ELEVATED\", \"comments\": \"Slightly above normal. Suggests mild impaired fasting glucose.\" },\n" +
@@ -221,7 +221,7 @@ public class OpenAiClient {
     }
 
     private String offlineChatNotice() {
-        return "**AuraHealth AI is running in demo mode.** "
+        return "**PulseMind AI is running in demo mode.** "
                 + "To enable live, personalized answers, set the `OPENAI_API_KEY` environment variable on the server.\n\n"
                 + "In the meantime, here's some general guidance: for everyday wellness, focus on balanced meals, "
                 + "regular movement, good hydration, and 7–9 hours of sleep. For any concerning or persistent symptoms, "

@@ -9,7 +9,7 @@ import {
   Info,
   Scale,
 } from 'lucide-react'
-import { Card, Spinner } from '@/components/ui'
+import { Card, Spinner, Button } from '@/components/ui'
 import { PageHeader } from '@/components/layout/PageHeader'
 import {
   fetchChartsData,
@@ -120,6 +120,15 @@ export function Analytics() {
       <div className="flex h-[400px] w-full flex-col items-center justify-center gap-3">
         <Spinner size={24} />
         <p className="text-sm font-medium text-ink-muted">Aggregating vitals trends…</p>
+      </div>
+    )
+  }
+
+  if (!chartsData) {
+    return (
+      <div className="flex h-[400px] w-full flex-col items-center justify-center gap-3">
+        <p className="text-sm font-medium text-danger">Failed to load analytics data.</p>
+        <Button onClick={loadData}>Retry</Button>
       </div>
     )
   }

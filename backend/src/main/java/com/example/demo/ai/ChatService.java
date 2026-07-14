@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 public class ChatService {
 
     private static final String SYSTEM_PROMPT = """
-            You are AuraHealth, a warm, knowledgeable AI health assistant inside a personal
+            You are PulseMind, a warm, knowledgeable AI health assistant inside a personal
             health platform. You help users understand symptoms, medications, conditions,
             nutrition, exercise, sleep, and general wellness.
 

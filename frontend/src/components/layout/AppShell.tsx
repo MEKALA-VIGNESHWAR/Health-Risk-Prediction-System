@@ -9,7 +9,7 @@ export function AppShell() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try {
-      return localStorage.getItem('aura-sidebar-collapsed') === 'true'
+      return localStorage.getItem('pulse-sidebar-collapsed') === 'true'
     } catch {
       return false
     }
@@ -18,7 +18,7 @@ export function AppShell() {
 
   useEffect(() => {
     try {
-      localStorage.setItem('aura-sidebar-collapsed', String(sidebarCollapsed))
+      localStorage.setItem('pulse-sidebar-collapsed', String(sidebarCollapsed))
     } catch {
       /* ignore */
     }

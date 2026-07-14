@@ -1,10 +1,10 @@
-# Architecture: AI Health Risk Prediction System 2.0 (AuraHealth)
+# Architecture: AI Health Risk Prediction System 2.0 (PulseMind)
 
-This document describes the high-level architecture, design decisions, and system interactions for the upgraded AuraHealth Platform.
+This document describes the high-level architecture, design decisions, and system interactions for the upgraded PulseMind Platform.
 
 ## 🏗️ System Overview
 
-AuraHealth is structured as a **modular three-tier web application** designed for production scaling, local testing simplicity, and high-fidelity rendering.
+PulseMind is structured as a **modular three-tier web application** designed for production scaling, local testing simplicity, and high-fidelity rendering.
 
 ```
 ┌────────────────────────────────────────────────────────┐

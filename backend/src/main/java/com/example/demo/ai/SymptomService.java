@@ -133,7 +133,7 @@ public class SymptomService {
 
     private SymptomResponse demoResponse(String text) {
         return new SymptomResponse(
-                "You described: \"" + text + "\". AuraHealth is in demo mode, so this is general "
+                "You described: \"" + text + "\". PulseMind is in demo mode, so this is general "
                         + "guidance rather than an AI analysis of your specific symptoms.",
                 "MODERATE",
                 "Without AI analysis we can't assess severity — use your judgement and watch for red flags.",

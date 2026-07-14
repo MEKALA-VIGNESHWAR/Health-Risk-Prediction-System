@@ -22,6 +22,9 @@ WORKDIR /app
 # Copy the built jar from the builder stage
 COPY --from=builder /app/backend/target/*.jar app.jar
 
+# Copy the data folder containing ML CSV files for KNN model
+COPY --from=builder /app/data /app/data
+
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-Xmx300m", "-jar", "app.jar"]

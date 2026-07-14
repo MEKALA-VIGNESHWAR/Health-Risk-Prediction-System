@@ -1,6 +1,6 @@
-# Architecture Decisions Log: AI Health Risk Prediction System 2.0 (AuraHealth)
+# Architecture Decisions Log: AI Health Risk Prediction System 2.0 (PulseMind)
 
-This document tracks the technical and design decisions, rationales, and consequences of architectural choices made during the Version 2.0 AuraHealth upgrade.
+This document tracks the technical and design decisions, rationales, and consequences of architectural choices made during the Version 2.0 PulseMind upgrade.
 
 ---
 

@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Sparkles, Send, Square, RotateCcw, Info } from 'lucide-react'
-import { AuraMark } from '@/components/layout/Logo'
+import { PulseMark } from '@/components/layout/Logo'
 import { Markdown } from '@/components/Markdown'
 import { Badge, Button } from '@/components/ui'
 import { useChat, type ChatMessage } from '@/features/ai/useChat'
@@ -37,7 +37,7 @@ function Bubble({ message }: { message: ChatMessage }) {
       className={cn('flex gap-3', isUser ? 'flex-row-reverse' : 'flex-row')}
     >
       {!isUser && (
-        <AuraMark className="mt-0.5 h-8 w-8 shrink-0 rounded-lg shadow-soft" />
+        <PulseMark className="mt-0.5 h-8 w-8 shrink-0 rounded-lg shadow-soft" />
       )}
       <div
         className={cn(
@@ -177,7 +177,7 @@ export function Assistant() {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={onKeyDown}
             rows={1}
-            placeholder="Message AuraHealth…"
+            placeholder="Message PulseMind…"
             className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2.5 text-[15px] text-ink outline-none placeholder:text-ink-subtle"
           />
           {isStreaming ? (
@@ -191,7 +191,7 @@ export function Assistant() {
           )}
         </div>
         <p className="mt-2 text-center text-xs text-ink-subtle">
-          AuraHealth can make mistakes. This is general information, not medical advice.
+          PulseMind can make mistakes. This is general information, not medical advice.
         </p>
       </div>
     </div>
