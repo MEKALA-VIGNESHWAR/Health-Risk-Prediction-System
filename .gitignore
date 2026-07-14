@@ -16,10 +16,13 @@ data/*.trace.db
 # ============================================
 # Credentials & Secrets
 # ============================================
-firebase-adminsdk.json
 *.json
 !package.json
 !package-lock.json
+!tsconfig.json
+!tsconfig.node.json
+!tsconfig.app.json
+
 
 # Environment files
 .env
