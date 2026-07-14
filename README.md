@@ -1,145 +1,308 @@
-# 🏥 PulseMind: Real-Time AI Clinical Healthcare Platform
+# 🩺 PulseMind
 
-PulseMind is a premium, real-time clinical AI health risk prediction and tracking SaaS platform. Designed like a modern digital healthcare workspace, it enables patients to evaluate cardiovascular and diabetes risks, monitor key vitals (BMI, blood pressure, sleep, blood sugar), parse medical lab reports automatically, schedule medicine reminders, and consult a streaming AI assistant.
+<h1 align="center">PulseMind — Real-Time AI Clinical Healthcare Platform</h1>
+
+<p align="center">
+  A premium healthcare platform powered by Artificial Intelligence, Machine Learning, and real-time analytics.
+</p>
+
+<p align="center">
+
+![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=for-the-badge&logo=postgresql)
+![Machine Learning](https://img.shields.io/badge/Machine_Learning-KNN-red?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+
+</p>
 
 ---
 
-## 🏗️ Architecture
+## ✨ Overview
 
+PulseMind is a modern healthcare workspace that combines Artificial Intelligence, Machine Learning, and real-time health analytics into a single platform.
+
+Users can:
+
+- 🫀 Predict heart disease risk
+- 🩸 Predict diabetes risk
+- 📊 Monitor health vitals
+- 🤖 Chat with an AI assistant
+- 📄 Analyze medical reports
+- 💊 Schedule medications
+- 🚨 Receive health alerts
+
+---
+
+# 📸 Screenshots
+
+> Add screenshots inside a `screenshots/` folder.
+
+```text
+screenshots/
+
+├── dashboard.png
+├── analytics.png
+├── chatbot.png
+├── predictions.png
+└── reports.png
 ```
+
+| Dashboard | AI Assistant |
+|:---:|:---:|
+| ![](screenshots/dashboard.png) | ![](screenshots/chatbot.png) |
+
+| Analytics | Predictions |
+|:---:|:---:|
+| ![](screenshots/analytics.png) | ![](screenshots/predictions.png) |
+
+---
+
+# 🏗️ Architecture
+
+```text
 ┌──────────────────────────────────────────┐
 │             PulseMind React SPA          │
-│       Vitals Tracking · ML Predictions   │
+│   Analytics · Predictions · AI Chat      │
 └────────────────────┬─────────────────────┘
                      │ REST API / JSON
 ┌────────────────────┴─────────────────────┐
-│          Spring Boot REST API            │
-│      JWT Auth · Spring AI · Java KNN     │
+│          Spring Boot Backend             │
+│     JWT · Spring AI · Java KNN Engine    │
 └────────────────────┬─────────────────────┘
                      │ JDBC
 ┌────────────────────┴─────────────────────┐
-│          Supabase PostgreSQL             │
-│      Users · Predictions · Daily Logs    │
+│         Supabase PostgreSQL              │
+│ Users · Predictions · Reports · Vitals   │
 └──────────────────────────────────────────┘
 ```
 
 ---
 
-## 📁 Project Structure
+# 🚀 Features
 
+## 🧠 Java-Powered KNN ML Engine
+
+- Pure Java implementation of **K-Nearest Neighbors (KNN)**.
+- Trains automatically using:
+
+  - `diabetes.csv`
+  - `heart_clean.csv`
+
+- Performs:
+
+  - Data cleaning
+  - Median imputation
+  - Feature scaling
+  - Risk prediction
+
+- Uses **K = 15 neighbors**.
+
+Example output:
+
+```text
+Clinical Risk: POSITIVE
+
+Healthy Probability: 27%
+Disease Probability: 73%
 ```
+
+---
+
+## 📊 Health Analytics Dashboard
+
+Track:
+
+- Weight
+- Blood pressure
+- Blood sugar
+- BMI
+- Sleep
+- Hydration
+- Calories
+
+Visualized using responsive Recharts dashboards.
+
+---
+
+## 📄 Medical Report Parser
+
+Upload:
+
+- Images
+- PDFs
+- Lab reports
+
+The AI automatically:
+
+- Extracts biomarkers
+- Detects abnormal values
+- Explains medical terms
+- Generates summaries
+
+---
+
+## 🤖 AI Assistant & Symptom Checker
+
+Features:
+
+- Streaming AI chatbot
+- Symptom triage
+- Health FAQs
+- Personalized suggestions
+- Emergency recommendations
+
+---
+
+## 💊 Medication Scheduler
+
+- Medicine reminders
+- Frequency management
+- Dashboard alerts
+- Critical health warnings
+
+---
+
+# 🛠️ Tech Stack
+
+| Layer | Technology |
+|--------|--------|
+| Frontend | React + Vite + Tailwind CSS |
+| Backend | Spring Boot |
+| Database | Supabase PostgreSQL |
+| Authentication | JWT + Spring Security |
+| Machine Learning | Java KNN |
+| Charts | Recharts |
+| AI | OpenAI API |
+| Deployment | Docker |
+
+---
+
+# 📁 Project Structure
+
+```text
 PulseMind/
-├── backend/                  # Spring Boot REST Backend
-│   ├── src/main/java/        # Java source code
-│   │   └── com/example/demo/
-│   │       ├── ai/           # AI services (OpenAI client, Chat, Symptoms)
-│   │       ├── config/       # Spring Security, JPA, & CORS configuration
-│   │       ├── controller/   # API controllers (Auth, Predict, Reports, Dashboard)
-│   │       ├── dto/          # Data Transfer Objects
-│   │       ├── entity/       # JPA Database entities (User, Alerts, Vitals)
-│   │       ├── repository/   # JPA Repositories
-│   │       └── service/      # Core business logic (KNN engine, Auth)
-│   ├── src/main/resources/   # Application config & properties
-│   └── pom.xml               # Maven configuration
-├── frontend/                 # React SPA Workspace
-│   ├── src/                  # React components, pages, hooks, state, and styles
-│   ├── index.html            # Main template entry
-│   ├── vite.config.ts        # Vite configuration & proxy settings
-│   └── package.json          # Frontend npm scripts & dependencies
-├── data/                     # ML clinical training datasets
-│   ├── diabetes.csv          # Pima Indians Diabetes database
-│   └── heart_clean.csv       # Clinical Heart Disease dataset
-├── ml/                       # Legacy ML prototypes (Python)
-└── Dockerfile                # Multi-stage production Docker builder
+
+├── backend/
+│   ├── src/
+│   ├── pom.xml
+│   └── resources/
+
+├── frontend/
+│   ├── src/
+│   ├── package.json
+│   └── vite.config.ts
+
+├── data/
+│   ├── diabetes.csv
+│   └── heart_clean.csv
+
+├── ml/
+
+├── screenshots/
+
+├── Dockerfile
+
+└── README.md
 ```
 
 ---
 
-## 🚀 Key Features
+# ⚙️ Running Locally
 
-### 1. Java-Powered KNN ML Engine
-Replaced standard rule-based heuristics with a high-performance, pure Java **K-Nearest Neighbors (KNN)** model:
-- Automatically loads, cleans, scales, and trains on `diabetes.csv` and `heart_clean.csv` clinical datasets at application startup.
-- Imputes invalid zero values for vital statistics (Glucose, Blood Pressure, BMI, etc.) using median imputation of the training dataset.
-- Executes $K=15$ neighbors searches to determine risk levels.
-- Produces a clear diagnostic verdict (`Clinical Risk: POSITIVE` or `Clinical Risk: NEGATIVE`) along with a detailed dual-probability meter (Healthy vs. Disease Risk %).
+## Backend
 
-### 2. Interactive Health Analytics
-- Logs daily vitals (weight, blood pressure, glucose, sleep, hydration, calories).
-- Features interactive, responsive **Recharts** displaying historical trends across weekly, monthly, and yearly intervals.
+```bash
+cd backend
 
-### 3. Medical Report Parser
-- Drop image or PDF lab reports directly.
-- The **OpenAI Vision API** parses and extracts biomarkers, flags outliers, and provides plain-English clinical explanations of abnormalities.
-
-### 4. Chat & Triage Assistant
-- A stateful streaming chatbot answering health FAQs with system prompt constraints.
-- A symptom triager highlighting recommended urgency steps and warnings.
-
-### 5. Medicine Scheduler
-- Set doses, times, and frequencies.
-- Automatically flags emergency alerts on the dashboard if logged vitals cross critical clinical thresholds.
+./mvnw spring-boot:run
+```
 
 ---
 
-## 🐳 Running the Platform
+## Frontend
 
-### Prerequisites
-- **Java 21** (Eclipse Temurin JRE)
-- **Node.js** (v18+)
-- **Maven** (optional, included `./mvnw` wrapper can be used)
+```bash
+cd frontend
 
-### Local Dev Mode (Mono-Repo Running)
-To start both backend and frontend dynamically during local development:
+npm install
 
-1. **Start Backend (API on Port 8080):**
-   ```bash
-   cd backend
-   ./mvnw spring-boot:run
-   ```
-2. **Start Frontend (Vite Dev Server on Port 5173):**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-3. Open **http://localhost:5173** to access the application.
+npm run dev
+```
 
 ---
 
-## 🏗️ Production Build & Render Deployment
+Open:
 
-To compile and package the entire app into a single deployable artifact (Vite assets bundled statically inside Spring Boot):
-
-```bash
-# In the root workspace directory
-mvn clean package -DskipTests
+```text
+http://localhost:5173
 ```
-This produces `backend/target/realtime-app-1.0.0.jar`.
 
-### Running the JAR:
-```bash
-java -jar backend/target/realtime-app-1.0.0.jar
-```
-Navigate to **http://localhost:8080** to access the production build.
+---
 
-### Dockerized Setup:
+# 🐳 Docker Setup
+
+Build the container:
+
 ```bash
-# Build the Docker container
 docker build -t pulsemind .
+```
 
-# Run the container
+Run:
+
+```bash
 docker run -p 8080:8080 pulsemind
 ```
-*Note: The Dockerfile is pre-configured to bundle and copy the training CSV files from the `data/` directory into the final runtime container so predictions execute seamlessly.*
 
 ---
 
-## 👥 Default Test Accounts
-On first database initialization, the backend provisions the following credential templates:
+# 📈 Machine Learning Models
+
+| Model | Dataset | Algorithm |
+|--------|--------|--------|
+| Diabetes Prediction | Pima Indians Dataset | KNN (K = 15) |
+| Heart Disease Prediction | Clinical Dataset | KNN (K = 15) |
+
+---
+
+# 🔮 Future Roadmap
+
+- [ ] Doctor Dashboard
+- [ ] Appointment Booking
+- [ ] Wearable Integration
+- [ ] Voice Assistant
+- [ ] Cloud Deployment
+- [ ] Email Notifications
+
+---
+
+# 👥 Default Test Accounts
 
 | Username | Password | Role |
 |----------|----------|------|
 | `testuser` | `Test@123` | Patient |
 | `Chintu_77` | `Chintu@123` | Patient |
 | `doctor1` | `Doctor@123` | Doctor |
+
+---
+
+# 👨‍💻 Developer
+
+## Mekala Vigneshwar Reddy
+
+🎓 B.Tech Student — CVR College of Engineering
+
+☕ Java & Spring Boot Developer
+
+📊 Data Science Enthusiast
+
+💻 Passionate about AI, Healthcare, and Full-Stack Development
+
+---
+
+# ⭐ Support
+
+If you found this project useful, consider giving it a star.
+
+Made with ❤️ using Java, React, Spring Boot, and Machine Learning.
