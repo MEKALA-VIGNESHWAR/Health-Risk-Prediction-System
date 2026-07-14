@@ -7,6 +7,10 @@
 </p>
 
 <p align="center">
+  <a href="https://health-risk-prediction-jck5.onrender.com" target="_blank"><strong>🚀 Live Demo on Render</strong></a>
+</p>
+
+<p align="center">
 
 ![Java](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.x-6DB33F?style=for-the-badge&logo=springboot)
@@ -14,6 +18,7 @@
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=for-the-badge&logo=postgresql)
 ![Machine Learning](https://img.shields.io/badge/Machine_Learning-KNN-red?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
+[![Render Live](https://img.shields.io/badge/Render-Live-success?style=for-the-badge&logo=render)](https://health-risk-prediction-jck5.onrender.com)
 
 </p>
 
