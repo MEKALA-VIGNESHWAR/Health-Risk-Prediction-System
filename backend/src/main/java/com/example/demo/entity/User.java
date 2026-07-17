@@ -63,6 +63,12 @@ public class User {
     @Column(name = "weight_kg")
     private Double weightKg;
 
+    @Column(name = "age")
+    private Integer age;
+
+    @Column(name = "bmi")
+    private Double bmi;
+
     @Column(name = "blood_group")
     private String bloodGroup;
 

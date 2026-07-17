@@ -28,8 +28,6 @@ import { cn } from '@/lib/cn'
 const field =
   'h-11 w-full rounded-xl border border-line bg-surface px-3.5 text-[15px] text-ink outline-none transition focus:border-brand-400 focus:ring-4 focus:ring-brand-500/15'
 
-const GENDERS = ['Male', 'Female', 'Other', 'Prefer not to say']
-const BLOOD = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']
 const SMOKING = ['never', 'former', 'current']
 const ALCOHOL = ['none', 'occasional', 'regular']
 const EXERCISE = ['sedentary', 'light', 'moderate', 'active']
@@ -42,8 +40,10 @@ function toUpdate(p: ProfileT): ProfileUpdate {
     phone: p.phone ?? '',
     gender: p.gender ?? '',
     dateOfBirth: p.dateOfBirth ?? null,
+    age: p.age ?? null,
     heightCm: p.heightCm ?? null,
     weightKg: p.weightKg ?? null,
+    bmi: p.bmi ?? null,
     bloodGroup: p.bloodGroup ?? '',
     medicalHistory: p.medicalHistory ?? '',
     currentMedications: p.currentMedications ?? '',
@@ -59,10 +59,9 @@ function toUpdate(p: ProfileT): ProfileUpdate {
   }
 }
 
-function bmiInfo(h?: number | null, w?: number | null) {
-  if (!h || !w || h <= 0) return null
-  const m = h / 100
-  const bmi = Math.round((w / (m * m)) * 10) / 10
+function bmiInfo(h?: number | null, w?: number | null, manualBmi?: number | null) {
+  const bmi = manualBmi ?? (h && w && h > 0 ? Math.round((w / ((h / 100) * (h / 100))) * 10) / 10 : null)
+  if (!bmi) return null
   const cat = bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Healthy' : bmi < 30 ? 'Overweight' : 'Obese'
   const tone = bmi < 18.5 ? 'info' : bmi < 25 ? 'success' : bmi < 30 ? 'warning' : 'danger'
   const pct = Math.max(0, Math.min(100, ((bmi - 12) / (40 - 12)) * 100))
@@ -103,8 +102,8 @@ export function Profile() {
   const num = (v: string): number | null => (v === '' ? null : Number(v))
 
   const bmi = useMemo(
-    () => bmiInfo(form?.heightCm ?? profile?.heightCm, form?.weightKg ?? profile?.weightKg),
-    [form?.heightCm, form?.weightKg, profile],
+    () => bmiInfo(form?.heightCm ?? profile?.heightCm, form?.weightKg ?? profile?.weightKg, form?.bmi ?? profile?.bmi),
+    [form?.heightCm, form?.weightKg, form?.bmi, profile],
   )
 
   async function onAvatar(e: React.ChangeEvent<HTMLInputElement>) {
@@ -160,7 +159,7 @@ export function Profile() {
   }
 
   const fullName = [form.firstName, form.lastName].filter(Boolean).join(' ') || profile.username
-  const age = ageFrom(form.dateOfBirth) ?? profile.age
+  const age = form.age ?? ageFrom(form.dateOfBirth) ?? profile.age
 
   return (
     <div>
@@ -256,16 +255,13 @@ export function Profile() {
               <input type="date" className={field} value={form.dateOfBirth ?? ''} onChange={(e) => set('dateOfBirth', e.target.value || null)} />
             </F>
             <F label="Gender" editing={editing} value={form.gender} className="capitalize">
-              <select className={field} value={form.gender ?? ''} onChange={(e) => set('gender', e.target.value)}>
-                <option value="">Select…</option>
-                {GENDERS.map((g) => <option key={g} value={g.toLowerCase()}>{g}</option>)}
-              </select>
+              <input className={field} value={form.gender ?? ''} onChange={(e) => set('gender', e.target.value)} placeholder="e.g. Male, Female" />
             </F>
             <F label="Blood group" editing={editing} value={form.bloodGroup}>
-              <select className={field} value={form.bloodGroup ?? ''} onChange={(e) => set('bloodGroup', e.target.value)}>
-                <option value="">Select…</option>
-                {BLOOD.map((b) => <option key={b} value={b}>{b}</option>)}
-              </select>
+              <input className={field} value={form.bloodGroup ?? ''} onChange={(e) => set('bloodGroup', e.target.value)} placeholder="e.g. O+, B-" />
+            </F>
+            <F label="Age" editing={editing} value={form.age != null ? `${form.age} yrs` : ''} className="col-span-2">
+              <input type="number" className={field} value={form.age ?? ''} onChange={(e) => set('age', num(e.target.value))} placeholder="e.g. 25" />
             </F>
           </Grid>
         </Section>
@@ -279,6 +275,9 @@ export function Profile() {
             <F label="Weight (kg)" editing={editing} value={form.weightKg != null ? `${form.weightKg} kg` : ''}>
               <input type="number" className={field} value={form.weightKg ?? ''} onChange={(e) => set('weightKg', num(e.target.value))} placeholder="68" />
             </F>
+            <F label="BMI (manual override)" editing={editing} value={form.bmi != null ? `${form.bmi}` : ''} className="col-span-2">
+              <input type="number" step="0.1" className={field} value={form.bmi ?? ''} onChange={(e) => set('bmi', num(e.target.value))} placeholder="e.g. 22.5" />
+            </F>
           </Grid>
           {/* BMI gauge */}
           <div className="mt-4 rounded-xl border border-line bg-surface/50 p-4">
@@ -290,7 +289,7 @@ export function Profile() {
                   <Badge tone={bmi.tone}>{bmi.cat}</Badge>
                 </span>
               ) : (
-                <span className="text-sm text-ink-subtle">Add height & weight</span>
+                <span className="text-sm text-ink-subtle">Add height & weight or BMI</span>
               )}
             </div>
             <div className="relative mt-3 h-2.5 overflow-hidden rounded-full bg-gradient-to-r from-info via-success via-warning to-danger">

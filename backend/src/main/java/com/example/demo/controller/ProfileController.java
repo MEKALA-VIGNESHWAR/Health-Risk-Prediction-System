@@ -62,8 +62,10 @@ public class ProfileController {
         u.setPhone(r.phone());
         u.setGender(r.gender());
         u.setDateOfBirth(r.dateOfBirth());
+        u.setAge(r.age());
         u.setHeightCm(r.heightCm());
         u.setWeightKg(r.weightKg());
+        u.setBmi(r.bmi());
         u.setBloodGroup(r.bloodGroup());
         u.setMedicalHistory(r.medicalHistory());
         u.setCurrentMedications(r.currentMedications());

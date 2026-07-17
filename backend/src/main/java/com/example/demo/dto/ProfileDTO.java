@@ -40,8 +40,8 @@ public record ProfileDTO(
         Double waterIntakeLiters
 ) {
     public static ProfileDTO from(User u) {
-        Integer age = computeAge(u.getDateOfBirth());
-        Double bmi = computeBmi(u.getHeightCm(), u.getWeightKg());
+        Integer age = u.getAge() != null ? u.getAge() : computeAge(u.getDateOfBirth());
+        Double bmi = u.getBmi() != null ? u.getBmi() : computeBmi(u.getHeightCm(), u.getWeightKg());
         return new ProfileDTO(
                 u.getId() != null ? u.getId().toString() : null,
                 u.getUsername(),

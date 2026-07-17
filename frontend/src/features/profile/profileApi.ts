@@ -32,7 +32,7 @@ export interface Profile {
 
 export type ProfileUpdate = Omit<
   Profile,
-  'userId' | 'username' | 'email' | 'role' | 'age' | 'bmi' | 'bmiCategory'
+  'userId' | 'username' | 'email' | 'role' | 'bmiCategory'
 >
 
 export const getProfile = () => api.get<Profile>('/profile/me')
