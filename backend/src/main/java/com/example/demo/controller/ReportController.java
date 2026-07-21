@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.ReportDTO;
 import com.example.demo.entity.MedicalReport;
 import com.example.demo.service.MedicalReportService;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +42,7 @@ public class ReportController {
                     file.getBytes(),
                     UUID.fromString(userId)
             );
-            return ResponseEntity.ok(report);
+            return ResponseEntity.ok(ReportDTO.fromEntity(report));
 
         } catch (IllegalArgumentException e) {
             log.error("Invalid user ID format: {}", userId);
@@ -54,10 +55,11 @@ public class ReportController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MedicalReport>> getReportsForUser(@PathVariable String userId) {
+    public ResponseEntity<List<ReportDTO>> getReportsForUser(@PathVariable String userId) {
         try {
             List<MedicalReport> reports = reportService.getReportsByUserId(UUID.fromString(userId));
-            return ResponseEntity.ok(reports);
+            List<ReportDTO> dtos = reports.stream().map(ReportDTO::fromEntity).toList();
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             log.error("Failed to fetch reports: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

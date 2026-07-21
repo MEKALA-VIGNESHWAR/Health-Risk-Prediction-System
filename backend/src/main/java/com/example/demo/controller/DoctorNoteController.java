@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.DoctorNoteDTO;
 import com.example.demo.entity.DoctorNote;
 import com.example.demo.repository.DoctorNoteRepositoryJPA;
 import lombok.RequiredArgsConstructor;
@@ -8,17 +9,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
- * DoctorNoteController - REST endpoints for doctor notes with timestamp history
- * 
- * Endpoints:
- * - POST /api/notes                        - Create a new note
- * - GET  /api/notes/patient/{patientId}    - Get all notes for a patient
- * - GET  /api/notes/prediction/{predId}    - Get notes for a prediction
- * - DELETE /api/notes/{noteId}             - Delete a note
+ * DoctorNoteController - REST endpoints for doctor notes using DoctorNoteDTO
  */
 @RestController
 @RequestMapping("/api/notes")
@@ -54,8 +49,7 @@ public class DoctorNoteController {
 
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(Map.of("status", "success", "message", "Note saved",
-                            "noteId", saved.getId().toString(),
-                            "createdAt", saved.getCreatedAt().toString()));
+                            "note", DoctorNoteDTO.fromEntity(saved)));
         } catch (Exception e) {
             log.error("Error creating note: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,7 +66,8 @@ public class DoctorNoteController {
             log.info("GET /api/notes/patient/{}", patientId);
             UUID uuid = UUID.fromString(patientId);
             List<DoctorNote> notes = noteRepository.findByPatientIdOrderByCreatedAtDesc(uuid);
-            return ResponseEntity.ok(Map.of("status", "success", "data", notes, "count", notes.size()));
+            List<DoctorNoteDTO> dtos = notes.stream().map(DoctorNoteDTO::fromEntity).collect(Collectors.toList());
+            return ResponseEntity.ok(Map.of("status", "success", "data", dtos, "count", dtos.size()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(Map.of("status", "error", "message", "Invalid patient ID format"));
@@ -92,7 +87,8 @@ public class DoctorNoteController {
             log.info("GET /api/notes/prediction/{}", predictionId);
             UUID uuid = UUID.fromString(predictionId);
             List<DoctorNote> notes = noteRepository.findByPredictionIdOrderByCreatedAtDesc(uuid);
-            return ResponseEntity.ok(Map.of("status", "success", "data", notes));
+            List<DoctorNoteDTO> dtos = notes.stream().map(DoctorNoteDTO::fromEntity).collect(Collectors.toList());
+            return ResponseEntity.ok(Map.of("status", "success", "data", dtos));
         } catch (Exception e) {
             log.error("Error fetching notes: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

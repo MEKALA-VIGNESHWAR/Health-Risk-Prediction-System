@@ -1,11 +1,11 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.MedicineReminderDTO;
 import com.example.demo.entity.MedicineLog;
 import com.example.demo.entity.MedicineReminder;
 import com.example.demo.service.MedicineReminderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +32,7 @@ public class MedicineController {
                 return ResponseEntity.badRequest().body("User ID is required");
             }
             MedicineReminder saved = reminderService.createReminder(reminder);
-            return ResponseEntity.ok(saved);
+            return ResponseEntity.ok(MedicineReminderDTO.fromEntity(saved));
         } catch (Exception e) {
             log.error("Failed to create reminder: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -41,10 +41,11 @@ public class MedicineController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<MedicineReminder>> getRemindersForUser(@PathVariable String userId) {
+    public ResponseEntity<List<MedicineReminderDTO>> getRemindersForUser(@PathVariable String userId) {
         try {
             List<MedicineReminder> list = reminderService.getRemindersByUserId(UUID.fromString(userId));
-            return ResponseEntity.ok(list);
+            List<MedicineReminderDTO> dtos = list.stream().map(MedicineReminderDTO::fromEntity).toList();
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             log.error("Failed to get reminders: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -55,7 +56,7 @@ public class MedicineController {
     public ResponseEntity<?> toggleReminder(@PathVariable String id) {
         try {
             MedicineReminder updated = reminderService.toggleReminder(UUID.fromString(id));
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(MedicineReminderDTO.fromEntity(updated));
         } catch (Exception e) {
             log.error("Failed to toggle reminder: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

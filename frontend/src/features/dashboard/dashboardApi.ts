@@ -76,12 +76,23 @@ export interface DashboardData {
   alerts: Alert[]
 }
 
+async function fetchHeartHistory(userId: string): Promise<HeartPrediction[]> {
+  try {
+    const res = await api.get<any>(`/predict/heart/history/user/${userId}`)
+    if (Array.isArray(res)) return res
+    if (res && Array.isArray(res.data)) return res.data
+    return []
+  } catch {
+    return []
+  }
+}
+
 /** Fetch everything the dashboard needs in parallel; individual failures degrade to empty. */
 export async function fetchDashboard(userId: string): Promise<DashboardData> {
   const [profile, diabetes, heart, alerts] = await Promise.all([
     safe<Profile | null>(getProfile(), null),
     safe<DiabetesPrediction[]>(api.get(`/predict/history/user/${userId}`), []),
-    safe<HeartPrediction[]>(api.get(`/predict/heart/history/user/${userId}`), []),
+    fetchHeartHistory(userId),
     safe<Alert[]>(api.get(`/alerts/user/${userId}`), []),
   ])
   // Newest first

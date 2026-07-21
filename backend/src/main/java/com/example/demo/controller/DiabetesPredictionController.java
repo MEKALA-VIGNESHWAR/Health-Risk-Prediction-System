@@ -80,7 +80,6 @@ public class DiabetesPredictionController {
         log.info("GET /api/predict/history/user/{} - Fetching prediction history", userId);
         
         try {
-            // Validate UUID format
             if (userId == null || userId.trim().isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(new ErrorResponse("User ID is required", 400));
@@ -90,9 +89,12 @@ public class DiabetesPredictionController {
             log.info("Converted userId to UUID: {}", userUUID);
 
             List<DiabetesPrediction> history = predictionService.getPredictionHistory(userId);
-            log.info("Found {} predictions for user {}", history.size(), userId);
+            List<com.example.demo.dto.DiabetesPredictionDTO> dtos = history.stream()
+                    .map(com.example.demo.dto.DiabetesPredictionDTO::fromEntity)
+                    .toList();
+            log.info("Found {} predictions for user {}", dtos.size(), userId);
             
-            return ResponseEntity.ok(history);
+            return ResponseEntity.ok(dtos);
         } catch (IllegalArgumentException e) {
             log.error("Invalid UUID format for userId: {}", userId);
             return ResponseEntity.badRequest()
@@ -108,12 +110,15 @@ public class DiabetesPredictionController {
      * Get all high-risk predictions (diabetes positive)
      */
     @GetMapping("/high-risk")
-    public ResponseEntity<List<DiabetesPrediction>> getHighRiskPredictions() {
+    public ResponseEntity<List<com.example.demo.dto.DiabetesPredictionDTO>> getHighRiskPredictions() {
         log.info("GET /api/predict/high-risk - Fetching high-risk predictions");
         
         try {
             List<DiabetesPrediction> predictions = predictionService.getHighRiskPredictions();
-            return ResponseEntity.ok(predictions);
+            List<com.example.demo.dto.DiabetesPredictionDTO> dtos = predictions.stream()
+                    .map(com.example.demo.dto.DiabetesPredictionDTO::fromEntity)
+                    .toList();
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             log.error("Error fetching high-risk predictions: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -124,14 +129,14 @@ public class DiabetesPredictionController {
      * Get specific prediction result
      */
     @GetMapping("/{predictionId}")
-    public ResponseEntity<DiabetesPrediction> getPrediction(
+    public ResponseEntity<com.example.demo.dto.DiabetesPredictionDTO> getPrediction(
             @PathVariable String predictionId) {
         log.info("GET /api/predict/{} - Fetching prediction", predictionId);
         
         try {
             DiabetesPrediction prediction = predictionService.getPredictionById(predictionId);
             if (prediction != null) {
-                return ResponseEntity.ok(prediction);
+                return ResponseEntity.ok(com.example.demo.dto.DiabetesPredictionDTO.fromEntity(prediction));
             }
             return ResponseEntity.notFound().build();
         } catch (Exception e) {

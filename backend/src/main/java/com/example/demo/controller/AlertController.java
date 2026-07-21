@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.AlertDTO;
 import com.example.demo.entity.Alert;
 import com.example.demo.repository.AlertRepositoryJPA;
+import com.example.demo.service.AlertService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -15,17 +17,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * AlertController - Industry-level REST endpoints for the smart alert system
- * 
- * Endpoints:
- * - GET  /api/alerts                    - All alerts (paginated)
- * - GET  /api/alerts/user/{userId}      - Alerts for a specific user
- * - GET  /api/alerts/count/{userId}     - Unread alert count
- * - GET  /api/alerts/statistics         - Alert statistics
- * - GET  /api/alerts/unread             - All unread alerts
- * - PUT  /api/alerts/{id}/acknowledge   - Mark alert as read
- * - PUT  /api/alerts/acknowledge-all    - Mark all as read for a user
- * - DELETE /api/alerts/{id}             - Delete an alert
+ * AlertController - Industry-level REST endpoints for the smart alert system using DTOs
  */
 @RestController
 @RequestMapping("/api/alerts")
@@ -35,6 +27,7 @@ import java.util.stream.Collectors;
 public class AlertController {
 
     private final AlertRepositoryJPA alertRepository;
+    private final AlertService alertService;
 
     /**
      * GET /api/alerts - Get all alerts with optional pagination and severity filter
@@ -55,7 +48,8 @@ public class AlertController {
                 alerts = alertPage.getContent();
             }
 
-            return ResponseEntity.ok(new ApiResponse("success", "Alerts retrieved", alerts));
+            List<AlertDTO> dtos = alerts.stream().map(AlertDTO::fromEntity).collect(Collectors.toList());
+            return ResponseEntity.ok(new ApiResponse("success", "Alerts retrieved", dtos));
         } catch (Exception e) {
             log.error("Error fetching alerts: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -73,7 +67,8 @@ public class AlertController {
             UUID uuid = UUID.fromString(userId);
 
             List<Alert> alerts = alertRepository.findByPatientIdOrderByCreatedAtDesc(uuid);
-            return ResponseEntity.ok(new ApiResponse("success", "User alerts retrieved", alerts));
+            List<AlertDTO> dtos = alerts.stream().map(AlertDTO::fromEntity).collect(Collectors.toList());
+            return ResponseEntity.ok(new ApiResponse("success", "User alerts retrieved", dtos));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse("error", "Invalid user ID format", null));
@@ -92,7 +87,7 @@ public class AlertController {
         try {
             log.info("GET /api/alerts/count/{}", userId);
             UUID uuid = UUID.fromString(userId);
-            long count = alertRepository.countByPatientIdAndIsReadFalse(uuid);
+            long count = alertService.getUnreadCount(uuid);
 
             Map<String, Object> result = new HashMap<>();
             result.put("count", count);
@@ -116,7 +111,8 @@ public class AlertController {
         try {
             log.info("GET /api/alerts/unread");
             List<Alert> alerts = alertRepository.findAllUnreadOrderBySeverity();
-            return ResponseEntity.ok(new ApiResponse("success", "Unread alerts retrieved", alerts));
+            List<AlertDTO> dtos = alerts.stream().map(AlertDTO::fromEntity).collect(Collectors.toList());
+            return ResponseEntity.ok(new ApiResponse("success", "Unread alerts retrieved", dtos));
         } catch (Exception e) {
             log.error("Error fetching unread alerts: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -131,14 +127,7 @@ public class AlertController {
     public ResponseEntity<?> getAlertStatistics() {
         try {
             log.info("GET /api/alerts/statistics");
-
-            Map<String, Object> stats = new LinkedHashMap<>();
-            stats.put("total", alertRepository.countByIsReadFalse());
-            stats.put("critical", alertRepository.countBySeverityAndIsReadFalse("CRITICAL"));
-            stats.put("high", alertRepository.countBySeverityAndIsReadFalse("HIGH"));
-            stats.put("medium", alertRepository.countBySeverityAndIsReadFalse("MEDIUM"));
-            stats.put("low", alertRepository.countBySeverityAndIsReadFalse("LOW"));
-
+            Map<String, Long> stats = alertService.getAlertStatistics();
             return ResponseEntity.ok(new ApiResponse("success", "Alert statistics retrieved", stats));
         } catch (Exception e) {
             log.error("Error fetching alert statistics: {}", e.getMessage());
@@ -154,17 +143,9 @@ public class AlertController {
     public ResponseEntity<?> acknowledgeAlert(@PathVariable String alertId) {
         try {
             log.info("PUT /api/alerts/{}/acknowledge", alertId);
-
             UUID uuid = UUID.fromString(alertId);
-            Optional<Alert> alertOpt = alertRepository.findById(uuid);
-            if (alertOpt.isPresent()) {
-                Alert alert = alertOpt.get();
-                alert.setIsRead(true);
-                alert.setAcknowledgedAt(LocalDateTime.now());
-                alertRepository.save(alert);
-                return ResponseEntity.ok(new ApiResponse("success", "Alert acknowledged", null));
-            }
-            return ResponseEntity.notFound().build();
+            alertService.acknowledgeAlert(uuid);
+            return ResponseEntity.ok(new ApiResponse("success", "Alert acknowledged", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse("error", "Invalid alert ID format", null));
@@ -185,7 +166,6 @@ public class AlertController {
             
             int updated;
             if ("all".equalsIgnoreCase(userId)) {
-                // Doctor acknowledging all alerts system-wide
                 List<Alert> unread = alertRepository.findAllUnreadOrderBySeverity();
                 unread.forEach(a -> {
                     a.setIsRead(true);
@@ -195,7 +175,7 @@ public class AlertController {
                 updated = unread.size();
             } else {
                 UUID uuid = UUID.fromString(userId);
-                updated = alertRepository.markAllReadForPatient(uuid, LocalDateTime.now());
+                updated = alertService.acknowledgeAllAlerts(uuid);
             }
             
             return ResponseEntity.ok(new ApiResponse("success",
@@ -215,7 +195,7 @@ public class AlertController {
         try {
             log.info("DELETE /api/alerts/{}", alertId);
             UUID uuid = UUID.fromString(alertId);
-            alertRepository.deleteById(uuid);
+            alertService.deleteAlert(uuid);
             return ResponseEntity.ok(new ApiResponse("success", "Alert deleted", null));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()

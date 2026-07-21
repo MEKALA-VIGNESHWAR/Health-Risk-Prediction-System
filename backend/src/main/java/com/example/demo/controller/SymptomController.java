@@ -93,7 +93,10 @@ public class SymptomController {
         try {
             User user = currentUser(auth);
             List<SymptomCheck> history = symptomCheckRepository.findByUserIdOrderByCreatedAtDesc(user.getId());
-            return ResponseEntity.ok(history);
+            List<com.example.demo.dto.SymptomCheckDTO> dtos = history.stream()
+                    .map(com.example.demo.dto.SymptomCheckDTO::fromEntity)
+                    .toList();
+            return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             log.error("Failed to fetch symptom history: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -124,11 +124,14 @@ public class HeartPredictionController {
         try {
             UUID userUUID = UUID.fromString(userId);
             List<HeartPrediction> history = predictionService.getPredictionHistory(userUUID);
+            List<com.example.demo.dto.HeartPredictionDTO> dtos = history.stream()
+                    .map(com.example.demo.dto.HeartPredictionDTO::fromEntity)
+                    .toList();
             
             return ResponseEntity.ok(new HashMap<String, Object>() {{
                 put("success", true);
-                put("data", history);
-                put("count", history.size());
+                put("data", dtos);
+                put("count", dtos.size());
             }});
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid user ID format");
@@ -151,11 +154,14 @@ public class HeartPredictionController {
         try {
             UUID userUUID = UUID.fromString(userId);
             List<HeartPrediction> highRiskPredictions = predictionService.getHighRiskPredictions(userUUID);
+            List<com.example.demo.dto.HeartPredictionDTO> dtos = highRiskPredictions.stream()
+                    .map(com.example.demo.dto.HeartPredictionDTO::fromEntity)
+                    .toList();
             
             return ResponseEntity.ok(new HashMap<String, Object>() {{
                 put("success", true);
-                put("data", highRiskPredictions);
-                put("count", highRiskPredictions.size());
+                put("data", dtos);
+                put("count", dtos.size());
             }});
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid user ID format");

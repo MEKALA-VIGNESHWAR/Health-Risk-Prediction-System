@@ -12,18 +12,19 @@
     </parent>
 
     <groupId>com.example</groupId>
-    <artifactId>realtime-app</artifactId>
+    <artifactId>pulsemind-backend</artifactId>
     <version>1.0.0</version>
-    <name>RealTime Health Risk Prediction</name>
-    <description>Real-time health risk prediction system with Supabase PostgreSQL</description>
+    <name>PulseMind Healthcare Platform</name>
+    <description>PulseMind — Real-Time AI Clinical Healthcare Platform</description>
 
     <properties>
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <!-- Frontend (React/Vite) build -->
+        <lombok.version>1.18.34</lombok.version>
+        <!-- Frontend (React/Vite) build. Set -Dskip.frontend=false for full production bundle -->
         <node.version>v22.12.0</node.version>
-        <skip.frontend>false</skip.frontend>
+        <skip.frontend>true</skip.frontend>
     </properties>
 
     <dependencies>
@@ -94,6 +95,24 @@
 
     <build>
         <plugins>
+            <!-- Compiler plugin with Lombok annotation processor -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <!-- Build the React/Vite frontend (produces ../frontend/dist).
                  Runs a self-contained Node install so `mvn package` builds the
                  whole app in one command on any platform. Skip with
