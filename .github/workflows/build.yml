@@ -1,0 +1,48 @@
+name: PulseMind CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test Full Stack Application
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Verify Backend Compilation & Unit Tests
+        run: |
+          cd backend
+          chmod +x mvnw
+          ./mvnw clean test "-Dskip.frontend=true"
+
+      - name: Verify Frontend Lint & Production Build
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+          npm run build
+
+      - name: Package Full Application JAR
+        run: |
+          cd backend
+          ./mvnw package "-Dskip.frontend=false"

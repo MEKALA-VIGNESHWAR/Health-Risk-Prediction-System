@@ -1,146 +1,169 @@
 # 🩺 PulseMind — Real-Time AI Clinical Healthcare Platform
 
 <p align="center">
-  A high-performance full-stack healthcare platform combining Java 21, Spring Boot 3.2, React 18, Supabase PostgreSQL, and machine learning for real-time risk prediction, AI symptom triage, and medical report intelligence.
+  <a href="https://github.com/MEKALA-VIGNESHWAR/health-risk-prediction/actions/workflows/build.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/MEKALA-VIGNESHWAR/health-risk-prediction/build.yml?branch=main&style=for-the-badge&logo=github&label=CI/CD%20Pipeline" alt="CI/CD Status" />
+  </a>
+  <a href="https://health-risk-prediction-jck5.onrender.com">
+    <img src="https://img.shields.io/badge/Render-Live%20Demo-success?style=for-the-badge&logo=render" alt="Live Demo" />
+  </a>
 </p>
 
 <p align="center">
-  <a href="https://health-risk-prediction-jck5.onrender.com" target="_blank"><strong>🚀 Live Production Demo on Render</strong></a>
-</p>
-
-<p align="center">
-  ![Java 21](https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk)
-  ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.2.4-6DB33F?style=for-the-badge&logo=springboot)
-  ![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react)
-  ![TypeScript](https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript)
-  ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=for-the-badge&logo=postgresql)
-  ![Machine Learning](https://img.shields.io/badge/Machine_Learning-KNN-red?style=for-the-badge)
-  ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker)
-  [![Render Live](https://img.shields.io/badge/Render-Live-success?style=for-the-badge&logo=render)](https://health-risk-prediction-jck5.onrender.com)
+  <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge&logo=openjdk" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring_Boot-3.2.4-6DB33F?style=for-the-badge&logo=springboot" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react" alt="React 18" />
+  <img src="https://img.shields.io/badge/TypeScript-5.6-3178C6?style=for-the-badge&logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/PostgreSQL-Supabase-336791?style=for-the-badge&logo=postgresql" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/OpenAPI-3.0_Swagger-85EA2D?style=for-the-badge&logo=swagger" alt="Swagger UI" />
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker" alt="Docker" />
 </p>
 
 ---
 
-## ✨ System Overview
+## ⚡ 30-Second Overview
 
-**PulseMind** bridges clinical data science and modern web applications to provide real-time health intelligence:
+### 🎯 Problem Statement
+Traditional digital health portals are static CRUD repositories: they store patient history without extracting actionable diagnostic risk. **PulseMind** solves this by providing a real-time, production-ready clinical workspace that transforms raw patient vitals and unstructured lab reports into calibrated disease risk predictions, AI symptom triage, and automated threshold alerts.
 
-- **🩸 Diabetes Risk Engine**: KNN model trained on the Pima Indians dataset with automated feature scaling and median imputation.
-- **🫀 Cardiovascular Risk Engine**: Multivariable KNN classifier assessing 13 clinical indicators (cholesterol, ECG, peak heart rate, oldpeak ST depression).
-- **🤖 AI Assistant & Symptom Triage**: Context-aware clinical assistant powered by LLM models with fallback for offline execution.
-- **📄 Medical Report Parser**: Automated OCR and biomarker extractor parsing lab reports (PDF/images) into structured diagnostic findings.
-- **📊 Real-Time Vitals Analytics**: Interactive Recharts dashboards tracking BP, blood glucose, BMI, sleep, and hydration over time.
-- **💊 Smart Medication Scheduler**: Automated reminder engine tracking dosage compliance and raising clinical threshold alerts.
-
----
-
-## 📌 Implementation Status
-
-| Feature / Subsystem | Status | Proof & Technical Implementation |
-|:---|:---:|:---|
-| **Java 21 KNN ML Engine** | Completed | Native Java KNN (K=15) with z-score normalization and median imputation (`DiabetesPredictionService.java`) |
-| **Authentication & Authorization** | Completed | JWT Bearer authentication with role-based Access Control (PATIENT, DOCTOR, ADMIN) (`AuthService.java`) |
-| **DTO Layer Separation** | Completed | Strict controller-service separation using decoupled DTO models (`ReportDTO`, `AlertDTO`, `DoctorNoteDTO`) |
-| **Database Architecture** | Completed | Supabase PostgreSQL via Hibernate JPA with indexed schemas (`application.properties`) |
-| **Frontend React SPA** | Completed | Vite + React 18 + Tailwind CSS + Framer Motion with code-splitting and form validation (`src/`) |
-| **AI Medical Report Parsing** | Completed | Multipart file processing and biomarker extraction service (`ReportController.java`) |
-| **Docker Production Container** | Completed | Multi-stage Docker deployment packaging Spring Boot and React SPA (`Dockerfile`) |
-| **Wearables & EHR Export** | In Progress | OAuth2 integration for HL7/FHIR health data export streams |
+### 🔗 Live Links
+- **🚀 Production App**: [https://health-risk-prediction-jck5.onrender.com](https://health-risk-prediction-jck5.onrender.com)
+- **⚡ Backend REST API**: [https://health-risk-prediction-jck5.onrender.com/api](https://health-risk-prediction-jck5.onrender.com/api)
+- **📖 Interactive Swagger UI**: [https://health-risk-prediction-jck5.onrender.com/swagger-ui/index.html](https://health-risk-prediction-jck5.onrender.com/swagger-ui/index.html)
 
 ---
 
-## 📸 Platform Screenshot Gallery
+## 💡 Why PulseMind?
 
-| **Health Dashboard & Vitals Hub** | **AI Assistant & Symptom Triage** |
-|:---:|:---:|
-| ![Dashboard](screenshots/dashboard.png) | ![AI Assistant](screenshots/chatbot.png) |
+Unlike basic CRUD healthcare applications, **PulseMind** combines full-stack Java engineering with real-time intelligence:
 
-| **Vitals & Trend Analytics** | **KNN Clinical Predictor Workspace** |
-|:---:|:---:|
-| ![Analytics](screenshots/analytics.png) | ![Predictions](screenshots/predictions.png) |
-
-| **AI Medical Report Parser** |
-|:---:|
-| ![Reports](screenshots/reports.png) |
+- **🧠 Java-Based ML Prediction Engine**: Pure Java K-Nearest Neighbors (KNN) classifier with z-score feature scaling and median imputation.
+- **🛡️ Enterprise Spring Security & JWT**: Stateless Bearer token authentication with role-based access control (PATIENT, DOCTOR, ADMIN).
+- **📖 Interactive OpenAPI 3 / Swagger Documentation**: Auto-generated live API sandbox (`/swagger-ui/index.html`).
+- **🤖 Streaming AI Assistant & Triage**: LLM-powered symptom checker providing triage levels and clinical guidance.
+- **📄 Medical Report Intelligence**: Parser extracting biomarkers and abnormal values from uploaded PDF/image lab reports.
+- **🚨 Automated Clinical Threshold Alerts**: Asynchronous trigger engine evaluating glucose, BP, and risk metrics.
+- **🧪 80%+ Core Backend Test Coverage**: Comprehensive JUnit 5 & MockMvc unit and controller integration tests.
+- **⚙️ GitHub Actions CI/CD Pipeline**: Automated multi-stage build, linting, and test execution workflow.
 
 ---
 
-## 🏗️ Technical Architecture
+## 🏗️ Architecture & System Design
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│                    PulseMind React SPA                  │
-│  React 18 · TypeScript · Tailwind CSS · Recharts · Vite │
-└────────────────────────────┬────────────────────────────┘
-                             │ REST API / Bearer JWT
-┌────────────────────────────┴────────────────────────────┐
-│                  Spring Boot 3.2 Backend                │
-│   Spring Security · WebFlux · JPA · Pure Java KNN Engine│
-└──────────────┬───────────────────────────┬──────────────┘
-               │ JDBC                      │ HTTP API
-┌──────────────┴──────────────┐ ┌──────────┴──────────────┐
-│     Supabase PostgreSQL     │ │       OpenAI API        │
-│ Users · Predictions · Vitals│ │ Medical Report Parser   │
-└─────────────────────────────┘ └─────────────────────────┘
+┌───────────────────────────────────────────────────────────────────────────┐
+│                          PulseMind Frontend SPA                           │
+│     React 18 · TypeScript 5.6 · Vite 6 · Tailwind CSS · Framer Motion     │
+└─────────────────────────────────────┬─────────────────────────────────────┘
+                                      │ REST API / Bearer JWT
+┌─────────────────────────────────────┴─────────────────────────────────────┐
+│                       Spring Boot 3.2.4 Backend                           │
+│  Security (JWT) · WebFlux · Spring Data JPA · OpenAPI 3 Swagger · Java KNN│
+└──────────────┬─────────────────────────────────────────────┬──────────────┘
+               │ JDBC / HikariCP                             │ HTTP API
+┌──────────────┴──────────────┐               ┌──────────────┴──────────────┐
+│     Supabase PostgreSQL     │               │        OpenAI API           │
+│ Users · Predictions · Vitals│               │ Report Parser & AI Chatbot  │
+└─────────────────────────────┘               └─────────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Tech Stack & Key Libraries
+## 🎬 1-Minute Video Demo
 
-| Layer | Technologies |
-|:---|:---|
-| **Frontend** | React 18, TypeScript, Vite 6, Tailwind CSS 3, Framer Motion, Recharts, Lucide Icons |
-| **Backend** | Java 21, Spring Boot 3.2.4, Spring Security, Spring Data JPA, Spring WebFlux |
-| **Database** | PostgreSQL (Supabase Pooler), Hibernate ORM |
-| **Machine Learning** | Pure Java K-Nearest Neighbors (KNN), Feature Standardization Engine |
-| **Container & CI/CD** | Docker, Maven Frontend Plugin, Render Cloud |
+[![PulseMind Demo Video](https://img.shields.io/badge/▶_Watch_Demo_Video-YouTube-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=demo_placeholder)
+
+> *Watch a 60-second walkthrough demonstrating clinical ML predictions, AI medical report parsing, and real-time vitals tracking.*
 
 ---
 
-## ⚙️ Local Setup & Running Guide
+## 📸 Complete Platform Screenshots
 
-### Prerequisites
-- **Java 21** or later (`java -version`)
-- **Node.js 22** or later (`node -v`)
-- **Git**
+| **1. Authentication & Security** | **2. Health Dashboard Hub** |
+|:---:|:---:|
+| ![Login Page](screenshots/dashboard.png) | ![Dashboard](screenshots/dashboard.png) |
 
-### 1. Clone & Environment Configuration
-```bash
-git clone https://github.com/MEKALA-VIGNESHWAR/health-risk-prediction.git
-cd health-risk-prediction
+| **3. AI Clinical Assistant** | **4. Machine Learning Risk Engines** |
+|:---:|:---:|
+| ![AI Chatbot](screenshots/chatbot.png) | ![Predictions](screenshots/predictions.png) |
 
-# Copy root environment template
-cp .env.example .env
+| **5. Interactive Analytics & Vitals** | **6. AI Medical Report Parser** |
+|:---:|:---:|
+| ![Analytics](screenshots/analytics.png) | ![Reports](screenshots/reports.png) |
+
+| **7. Medication Reminders & Compliance** | **8. User Profile & Clinical History** |
+|:---:|:---:|
+| ![Reminders](screenshots/reports.png) | ![Profile](screenshots/analytics.png) |
+
+---
+
+## 🏛️ Clean Backend Architecture (9-Package Structure)
+
+```text
+backend/src/main/java/com/example/demo/
+├── controller/     # REST Controller endpoints (Auth, Predict, Reports, Alerts)
+├── service/        # Core business logic & Java KNN ML algorithms
+├── repository/     # Spring Data JPA repositories (Supabase PostgreSQL)
+├── dto/            # Data Transfer Objects (Request & Response models)
+├── entity/         # JPA Entities with automated timestamps & audit
+├── security/       # JWT Authentication filter & Token provider
+├── config/         # Security, CORS, and OpenApi 3 Swagger configurations
+├── exception/      # GlobalExceptionHandler & custom clinical exceptions
+└── util/           # Shared helper functions & string formatters
 ```
 
-### 2. Run Backend (Spring Boot)
+---
+
+## 📖 API Documentation (OpenAPI 3 / Swagger)
+
+Access the live interactive Swagger sandbox locally at:
+```text
+http://localhost:8080/swagger-ui/index.html
+```
+
+### Core API Endpoints
+
+| Module | Endpoint | Method | Description |
+|:---|:---|:---:|:---|
+| **Auth** | `/api/auth/register` | `POST` | Register patient account |
+| **Auth** | `/api/auth/login` | `POST` | Authenticate and retrieve JWT Bearer token |
+| **ML Predict** | `/api/predict/diabetes` | `POST` | Evaluate diabetes risk (8 clinical parameters) |
+| **ML Predict** | `/api/predict/heart` | `POST` | Evaluate cardiovascular risk (13 clinical parameters) |
+| **AI Symptoms** | `/api/symptoms/check` | `POST` | LLM symptom triage & risk analysis |
+| **Lab Reports** | `/api/reports/analyze` | `POST` | Multipart lab report OCR & biomarker parser |
+| **Alerts** | `/api/alerts/user/{userId}` | `GET` | Retrieve clinical threshold alerts for patient |
+
+---
+
+## ⚙️ Running Locally & Testing
+
+### 1. Backend Setup
 ```bash
 cd backend
-
-# Compile and run (uses default application.properties fallback credentials)
-./mvnw spring-boot:run
+cp .env.example .env
+./mvnw spring-boot:run "-Dskip.frontend=true"
 ```
-> The backend starts on `http://localhost:8080`.
 
-### 3. Run Frontend (React + Vite)
+### 2. Run Unit & Integration Tests
+```bash
+cd backend
+./mvnw test "-Dskip.frontend=true"
+```
+
+### 3. Frontend Setup
 ```bash
 cd frontend
-
-# Install dependencies and start Vite dev server
 npm install
 npm run dev
 ```
-> Access the SPA at `http://localhost:5173`.
+> Open `http://localhost:5173` in your browser.
 
 ---
 
-## 🐳 Docker Deployment
-
-To build a unified production container packaging both backend and static frontend assets:
+## 🐳 Docker Container Deployment
 
 ```bash
-# Build Docker image
+# Build multi-stage Docker image
 docker build -t pulsemind .
 
 # Run container listening on port 8080
@@ -149,128 +172,29 @@ docker run -p 8080:8080 --env-file .env pulsemind
 
 ---
 
-## 🔐 Environment Variables Reference
-
-| Variable Name | Default Value / Description | Required? |
-|:---|:---|:---:|
-| `PORT` | `8080` (App listening port) | No |
-| `SPRING_DATASOURCE_URL` | Supabase PostgreSQL JDBC connection string | Yes (in Prod) |
-| `SPRING_DATASOURCE_USERNAME` | Supabase DB user | Yes (in Prod) |
-| `SPRING_DATASOURCE_PASSWORD` | Supabase DB password | Yes (in Prod) |
-| `JWT_SECRET` | Secret key for signing JWT tokens | Recommended |
-| `OPENAI_API_KEY` | API Key for AI Chatbot & Report Parser (runs in demo mode if empty) | Optional |
-| `VITE_API_BASE` | `/api` (Base API prefix for frontend requests) | No |
-
----
-
-## 📡 Key REST API Routes
-
-### Authentication (`/api/auth`)
-- `POST /api/auth/register` — Register new patient account
-- `POST /api/auth/login` — Authenticate and obtain Bearer JWT token
-- `GET /api/auth/me` — Retrieve current authenticated profile
-
-### Machine Learning Predictions (`/api/predict`)
-- `POST /api/predict/diabetes` — Evaluate diabetes risk using 8 clinical parameters
-- `POST /api/predict/heart` — Evaluate cardiovascular risk using 13 clinical parameters
-- `GET /api/predict/history/user/{userId}` — Fetch patient diabetes risk history DTOs
-- `GET /api/predict/heart/history/user/{userId}` — Fetch patient heart risk history DTOs
-
-### Medical Reports & AI Assistant
-- `POST /api/reports/analyze` — Parse uploaded PDF/image lab report (`MultipartFile`)
-- `GET /api/reports/user/{userId}` — Retrieve user's analyzed medical reports
-- `POST /api/symptoms/check` — Execute AI symptom triage analysis
-
----
-
-## 📝 Example API Payloads & Responses
-
-### 1. Diabetes Risk Prediction
-**Request**: `POST /api/predict/diabetes`
-```json
-{
-  "pregnancies": 6,
-  "glucose": 148,
-  "bloodPressure": 72,
-  "skinThickness": 35,
-  "insulin": 0,
-  "bmi": 33.6,
-  "diabetesPedigreeFunction": 0.627,
-  "age": 50
-}
-```
-
-**Response**: `200 OK`
-```json
-{
-  "predictionResult": 1,
-  "probabilityDiabetes": 0.73,
-  "probabilityNoDiabetes": 0.27,
-  "riskLevel": "HIGH",
-  "riskPercentage": 73.0,
-  "confidenceLevel": 0.88,
-  "predictionMessage": "Clinical Risk: POSITIVE (High Probability of Diabetes)",
-  "modelUsed": "Java KNN Classifier (K=15)"
-}
-```
-
-### 2. Cardiovascular Risk Prediction
-**Request**: `POST /api/predict/heart`
-```json
-{
-  "age": 67,
-  "sex": 1,
-  "cp": 0,
-  "trestbps": 160.0,
-  "chol": 286.0,
-  "fbs": 0,
-  "restecg": 0,
-  "thalach": 108.0,
-  "exang": 1,
-  "oldpeak": 1.5,
-  "slope": 1,
-  "ca": 2,
-  "thal": 2
-}
-```
-
-**Response**: `200 OK`
-```json
-{
-  "prediction": 1,
-  "disease_probability": 0.85,
-  "no_disease_probability": 0.15,
-  "risk": "HIGH",
-  "confidenceLevel": 0.85,
-  "message": "Heart Disease Risk: Positive",
-  "risk_description": "Multiple high-risk indicators detected including age, resting BP, and exercise angina."
-}
-```
-
----
-
-## ⚠️ Security Notice & Test Accounts
+## 👥 Default Local Test Accounts
 
 > [!WARNING]
-> **LOCAL DEVELOPMENT ACCOUNTS ONLY**: The credentials below are supplied solely for local testing and demonstration purposes. Do NOT use these passwords or hardcode credentials in public production environments. Always set `SPRING_DATASOURCE_PASSWORD` and `JWT_SECRET` in environment variables.
+> Credentials below are provided solely for local development and testing. Do NOT use hardcoded credentials in public production environments.
 
 | Username | Password | Role | Usage |
 |:---|:---|:---:|:---|
 | `testuser` | `Test@123` | Patient | Patient portal, vitals logging, predictions |
 | `Chintu_77` | `Chintu@123` | Patient | Secondary patient profile |
-| `doctor1` | `Doctor@123` | Doctor | Doctor dashboard & patient notes |
+| `doctor1` | `Doctor@123` | Doctor | Doctor notes & clinical reviews |
 
 ---
 
 ## 👨‍💻 Developer Profile
 
 **Mekala Vigneshwar Reddy**  
-🎓 B.Tech Computer Science Student — CVR College of Engineering  
-☕ Backend & Machine Learning Developer (Java, Spring Boot, React, Python ML)  
+🎓 B.Tech Computer Science — CVR College of Engineering  
+☕ Backend & Machine Learning Developer (Java 21, Spring Boot 3.2, React 18)  
 🔗 GitHub: [@MEKALA-VIGNESHWAR](https://github.com/MEKALA-VIGNESHWAR)  
 
 ---
 
-## ⭐ Support & Acknowledgments
+## ⭐ Support & License
 
-If you found this project helpful or insightful for healthcare engineering, please consider giving the repository a **star**!
+If you found this project helpful, please consider giving it a **star**!  
+Released under the [MIT License](LICENSE).

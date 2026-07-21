@@ -33,6 +33,9 @@ public class SecurityConfig {
                                 "/*.css", "/*.js", "/*.ico", "/*.png", "/*.jpg", "/*.jpeg", "/*.svg", "/*.webp", "/*.woff",
                                 "/*.woff2", "/*.ttf", "/*.eot", "/*.webmanifest").permitAll()
                 
+                // Swagger UI & OpenAPI 3 docs
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**").permitAll()
+
                 // Public API endpoints - no authentication required
                 .requestMatchers("/api/health", "/api/ping", "/api/status").permitAll()
                 .requestMatchers("/api/auth/register").permitAll()
