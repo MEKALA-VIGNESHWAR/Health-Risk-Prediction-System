@@ -24,7 +24,7 @@
         <lombok.version>1.18.36</lombok.version>
         <!-- Frontend (React/Vite) build. Set -Dskip.frontend=false for full production bundle -->
         <node.version>v22.12.0</node.version>
-        <skip.frontend>true</skip.frontend>
+        <skip.frontend>false</skip.frontend>
     </properties>
 
     <dependencies>

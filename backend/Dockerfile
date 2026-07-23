@@ -9,10 +9,10 @@ COPY mvnw pom.xml ./
 RUN chmod +x mvnw && ./mvnw dependency:resolve -B
 
 COPY src src
+COPY ../frontend ../frontend
 
-# Backend-only image (frontend is served separately, e.g. by nginx),
-# so skip the React build here.
-RUN ./mvnw clean package -DskipTests -B -Dskip.frontend=true
+# Build full monolithic application with React frontend bundled into static/
+RUN ./mvnw clean package -DskipTests -B -Dskip.frontend=false
 
 
 # --- Runtime Stage ---

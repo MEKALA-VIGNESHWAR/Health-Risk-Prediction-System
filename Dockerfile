@@ -11,7 +11,7 @@ COPY . .
 # This also builds the React frontend (via frontend-maven-plugin) into
 # ../frontend/dist and bundles it into the JAR's static/ folder.
 WORKDIR /app/backend
-RUN chmod +x mvnw && ./mvnw clean package -DskipTests -B
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests -Dskip.frontend=false -B
 
 
 # --- Runtime Stage ---
